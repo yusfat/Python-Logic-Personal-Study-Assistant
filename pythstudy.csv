@@ -1,0 +1,45 @@
+type,term,meaning,category
+decision,Why use csv.DictReader instead of csv.reader?,Because DictReader automatically turns each row into a dictionary using the header names as keys,Code Decision
+decision,Why store each term as a dictionary?,So that one item can hold multiple related pieces of information (type term meaning category),Code Decision
+decision,Why put all terms into a list of dictionaries?,So the program can easily loop through them select random ones and filter by type,Code Decision
+decision,Why use a separate terms.csv file?,To separate data from logic so terms can be updated without touching the Python code,Design Decision
+decision,Why not hard-code the terms inside quiz.py?,Hard-coding makes the file long hard to maintain and difficult for non-programmers to update,Design Decision
+decision,Why use functions for almost everything?,To make the code organized reusable easier to test and easier to understand,Code Decision
+decision,Why use while True for the main menu?,So the program keeps running until the user deliberately chooses to exit,Code Decision
+decision,Why use try-except when asking for number of questions?,To prevent the program from crashing if the user types text instead of a number,Error Handling
+decision,Why track recently asked questions?,To reduce repetition and make the quiz feel less predictable,Logic
+decision,Why save progress in JSON instead of CSV?,JSON is better for nested structured data like lists of wrong answers and review dates,Code Decision
+decision,Why use random.sample instead of random.choice in a loop?,random.sample guarantees unique questions in one quiz round,Code Decision
+decision,Why make is_correct() a separate function?,So the same answer-checking logic can be reused in quiz reverse practice and spaced repetition,Code Decision
+decision,Why allow flexible answer checking instead of exact match?,Because students may write partially correct answers and strict matching would be too frustrating,Learning Design
+decision,Why start with a CLI version?,It is simpler to build test and debug while learning the core logic,Project Decision
+decision,Why keep main branch as the stable version?,So users always get the best working code when they clone the repository,Git Decision
+decision,Why use a feature branch for big changes?,To protect the working version and experiment safely,Git Decision
+decision,Why use a Personal Access Token?,GitHub no longer accepts account passwords for Git operations and tokens are safer,Security Decision
+decision,Why make the repository public later and not immediately?,So you can improve the README and code quality before showing it to the world,Project Decision
+decision,Why create a separate Active Recall trainer project?,So it can grow independently and serve as a learning tool without mixing with the main project,Project Decision
+decision,Why use clear() function?,To improve user experience by cleaning the screen between different sections,User Experience
+decision,Why load the CSV only once at the start?,To avoid reading the file repeatedly which would be slower and unnecessary,Performance
+decision,Why store wrong answers with a future review time?,To implement basic spaced repetition so difficult items appear again later,Learning Design
+concept,Separation of Concerns,Keeping different responsibilities (data vs logic) in different places,Design Principle
+concept,Single Responsibility,Each function should do one clear thing,Design Principle
+concept,Data Structure Choice,Choosing list of dictionaries because each term has multiple attributes,Data Structures
+concept,Control Flow,Using while True + if-elif to control the program menu,Python
+concept,Error Prevention,Using try-except and checks to stop the program from crashing,Error Handling
+concept,Persistence,Saving data to JSON so progress survives after the program closes,File Handling
+question,What is the purpose of the load_terms() function?,To read the CSV file and convert it into a list of dictionaries the rest of the program can use,Code Understanding
+question,What would break if you remove the header row from terms.csv?,csv.DictReader would not know the column names and the program would fail or behave incorrectly,Code Understanding
+question,Why do we check len(user) < 3 in is_correct()?,To reject very short or empty answers that are almost certainly wrong,Logic
+question,What is the danger of working directly on the main branch?,You can easily break the stable version of the project,Git
+question,Why should commit messages be clear and professional?,Because they become part of the public history of the project,Git
+question,What is the benefit of a good README?,It helps other people understand and use your project quickly,Documentation
+question,Why is medical terminology a good project domain?,It has clear structure (prefix + root + suffix) and real educational value,Project Choice
+question,What is the biggest limitation of the current Medical Terminology Assistant?,It is still command-line only and not user-friendly for non-technical medical students,Project Evaluation
+question,How does the program know which questions are due for spaced repetition?,It compares the saved next_review time with the current time,Logic
+challenge,Main challenge when connecting CSV to Python,Making sure the code remains flexible when the CSV content changes,Challenge
+challenge,Why was answer checking difficult to get right?,Because too loose checking accepts wrong answers and too strict checking frustrates users,Challenge
+decision,Why prefer CSV over SQLite in the first version?,CSV is simpler to edit and sufficient for learning and small data,Technology Choice
+decision,When should you move from CSV to SQLite?,When the data becomes large or you need more advanced querying and relationships,Technology Choice
+concept,Active Recall Trainer Purpose,To force deep understanding of every decision and concept used in the project,Learning
+concept,Systems Thinking in this project,Understanding how data logic user experience and learning science work together,Thinking
+
