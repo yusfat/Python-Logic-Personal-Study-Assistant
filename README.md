@@ -16,17 +16,17 @@ This project gives you a focused, beginner-friendly trainer that turns the entir
 
 ✨ Features
 
-Mixed quizzes (term → meaning)
-Reverse practice (meaning → term)
-Spaced repetition system
-Wrong-answer tracking & review
-Browse concepts by category
-Full concept list review
-Code Logic Deep Dive (targeted questions about key lines and decisions)
-Strict Top-to-Bottom Code Walkthrough
-Clean separation of data and code (knowledge.csv + the Python script)
-Easy content management — just edit the CSV to add or update concepts
-Recent-question avoidance and flexible answer matching
+•Mixed quizzes (term → meaning)
+•Reverse practice (meaning → term)
+•Spaced repetition system
+•Wrong-answer tracking & review
+•Browse concepts by category
+•Full concept list review
+•Code Logic Deep Dive (targeted questions about key lines and decisions)
+•Strict Top-to-Bottom Code Walkthrough
+•Clean separation of data and code (knowledge.csv + the Python script)
+•Easy content management - just edit the CSV to add or update concepts
+•Recent-question avoidance and flexible answer matching
 
 🚀 Why This Project?
 
@@ -37,10 +37,10 @@ By combining conversational knowledge with explicit code-structure training, you
 
 Option 1: CLI Version (Terminal / Termux)
 
-How to Run
+#How to Run
 
-git clone 
-cd 
+git clone
+cd
 python quiz.py   # or the actual filename of the script
 
 Make sure knowledge.csv is present in the same folder. The program will create progress.json and recent.json automatically.
