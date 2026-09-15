@@ -6,7 +6,7 @@ Status
 
 Chat Knowledge Trainer 💬
 
-A lightweight open-source active-recall tool that helps you master every concept from a conversation and the logic of the code itself. Practice terms, meanings, categories, wrong answers, spaced repetition, and even deep code understanding — all in a simple terminal interface.
+A lightweight open-source active-recall tool that helps you master every concept from a conversation and the logic of the code itself. Practice terms, meanings, categories, wrong answers, spaced repetition, and even deep code understanding - all in a simple terminal interface.
 
 🎯 The Problem
 
