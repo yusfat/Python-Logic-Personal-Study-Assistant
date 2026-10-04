@@ -43,3 +43,17 @@ decision,When should you move from CSV to SQLite?,When the data becomes large or
 concept,Active Recall Trainer Purpose,To force deep understanding of every decision and concept used in the project,Learning
 concept,Systems Thinking in this project,Understanding how data logic user experience and learning science work together,Thinking
 
+decision,Why replace hardcoded salt with secrets.token_bytes()?,Because a fixed salt weakens security against precomputation attacks and makes every generation less unique,Security Decision
+decision,Why prefer secrets.token_bytes over os.urandom?,It has the same security but clearly shows the intent that the value is security-sensitive and keeps the code consistent,Security Decision
+decision,Why use a random switch_point instead of fixed 200?,A fixed number of hardened levels creates a detectable fingerprint that attackers can exploit,Security Decision
+concept,Hardcoded Salt Risk,Using a fixed string as salt reduces uniqueness and makes offline attacks easier,Security
+concept,Non-Deterministic Generation,Every run produces different output so the exact path cannot be predicted in advance,Security
+concept,Path Fingerprinting,When a generator always follows the same structural pattern (e.g. first 200 levels hardened) it becomes easier to recognize,Security
+concept,PBKDF2 vs Argon2id,PBKDF2 is widely supported but not memory-hard. Argon2id is stronger against GPU attacks,Cryptography
+decision,Why keep Code N procedural instead of OOP?,For this size of tool procedural code is simpler clearer and easier to maintain,Design Decision
+concept,Separation of Concerns in PathGen,Pools crypto generation and user interface are kept in different files,Design Principle
+question,What does make_system_salt() do?,It creates a strong internal random salt that is never shown to the user and is used to stretch the material,Code Understanding
+question,Why are intermediate salts never displayed?,Because showing them would reduce security and defeat the purpose of internal stretching,Security
+question,What is the danger of a fixed switch point like if i < 200?,It creates a predictable structure that can be used as a fingerprint by attackers,Security
+challenge,Main challenge when designing custom derivation paths,Balancing strong obfuscation with the risk of creating detectable patterns,Challenge
+
