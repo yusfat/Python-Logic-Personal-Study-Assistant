@@ -402,3 +402,55 @@ exercise,EX17 Flatten stall before random pick,"Broken: random.choice(emoji_stal
 exercise,EX18 Thin UI vs crypto mix,"Broken: main.py contains pbkdf2 and path building inline | Symptom: hard to test and easy to leak secrets in UI layer | Cause: mixed responsibilities | Fix: move crypto to crypto.py and keep main thin",Design Lab
 exercise,EX19 Predictable switch point,"Broken: if i < 200 always hardened | Symptom: structural fingerprint | Cause: fixed pattern every run | Fix: random switch_point in a range",Security Lab
 exercise,EX20 Flexible answer checker edge,"Broken: is_correct accepts any answer containing one short common word | Symptom: false positives | Cause: overly loose matching | Fix: require minimum length and stronger overlap rules",Logic Lab
+
+#🫴 
+exercise,EX1 Early return in nested loop,return inside outer loop exits too early; move return after both loops,Debug Lab
+exercise,EX2 append vs extend on strings,list(string) splits characters; append whole strings and extend only real lists,Debug Lab
+exercise,EX3 Hardcoded salt + print leak,fixed salt and printed secret are unsafe; use secrets.token_bytes and never print secrets,Security Lab
+exercise,EX4 DictReader without header,DictReader needs header type term meaning category or keys become wrong,Data Lab
+exercise,EX5 JSON progress KeyError,default progress must include wrong list and next_review dict,Data Lab
+exercise,EX6 Off-by-one switch point,use < not <= for switch boundary to avoid one extra hardened level,Logic Lab
+exercise,EX7 Noise before digits,digits must come first then optional hardening mark then noise,Security Lab
+exercise,EX8 Shadowed loop variable,inner loop name must not overwrite outer loop name,Bug Lab
+exercise,EX9 Missing try-except on int input,guard int conversion with try except and a default value,Error Handling Lab
+exercise,EX10 Direct commits on main,use feature branch testing and merge to keep main stable,Git Lab
+exercise,EX11 Secret committed then deleted,deletion does not remove git history; rotate secret and ignore env files,Security Lab
+exercise,EX12 cat heredoc gitignore,use cat with EOF to write multi-line .gitignore cleanly,Linux Lab
+exercise,EX13 diff then patch workflow,diff -u creates patch; cat reviews it; patch applies it,Linux Lab
+exercise,EX14 heredoc piped to patch,cat heredoc can pipe an inline patch but review risk remains,Linux Lab
+exercise,EX15 combined cat diff patch recovery,backup edit diff review apply preserves an auditable repair trail,Linux Lab
+exercise,EX16 deep nested count early return,return too deep undercounts; accumulate fully then return once,Loop Lab
+exercise,EX17 nested stall random choice,choice on nested groups returns a group; flatten first,Generator Lab
+exercise,EX18 thin UI violated,keep crypto out of main and split into crypto and generator modules,Design Lab
+exercise,EX19 fixed switch point fingerprint,randomize switch point so path structure is less predictable,Security Lab
+exercise,EX20 loose answer checker,require minimum length and stronger overlap to reduce false passes,Logic Lab
+exercise,EX21 PBKDF2 iterations too low,low iterations are cheap to attack; raise iterations for harder brute force,Security Lab
+exercise,EX22 returning internal salt to UI,return only needed values and never expose internal salt to UI or logs,Security Lab
+exercise,EX23 predictable forced path ending,avoid unnecessary fixed endings that create structural fingerprints,Security Lab
+exercise,EX24 missing env var handling,read required secrets with clear failure if environment value is absent,Security Lab
+exercise,EX25 env committed to git,rotate secrets remove tracking and add gitignore protection,Security Lab
+exercise,EX26 no feature branch workflow,develop on feature branch and protect main with review,Git Lab
+exercise,EX27 Termux clipboard hard dependency,make clipboard optional with fallback for desktop systems,Design Lab
+exercise,EX28 HMAC with public key material,HMAC key must come from secret material not a public constant,Security Lab
+exercise,EX29 logging passphrase,never log secrets; log events only,Security Lab
+exercise,EX30 random module for security salt,use secrets for security-sensitive randomness,Security Lab
+exercise,EX31 force push on shared main,avoid force push on shared main; use PR and protection rules,Git Lab
+exercise,EX32 unpinned dependencies,pin dependency versions for reproducibility and safer updates,DevOps Lab
+exercise,EX33 bare except pass,do not hide failures; catch specific errors and report clearly,Error Handling Lab
+exercise,EX34 hard truncation splits emoji,truncate on segment boundaries to avoid breaking unicode tokens,Unicode Lab
+exercise,EX35 hardcoded shared pepper,do not hardcode shared pepper in source; use external secret storage,Security Lab
+exercise,EX36 CLI threat model on public web,public web needs rate limits and stricter controls than local CLI,Master Lab
+exercise,EX37 malicious PR without audit,review every line for network calls secret reads and surprise files,Master Lab
+exercise,EX38 overstated obfuscation claims,emoji noise is obfuscation not cryptographic strength,Master Lab
+exercise,EX39 no fingerprintability test plan,measure structural invariants and test detectability then mitigate,Master Lab
+exercise,EX40 passphrase retained everywhere,minimize secret copies and avoid long-lived UI or log exposure,Master Lab
+exercise,EX41 Argon2id migration design,Argon2id is memory-hard and should be documented with parameters,Master Lab
+exercise,EX42 weak research packaging,pin deps tag releases and provide checksums for integrity,Master Lab
+exercise,EX43 dangerous README guidance,never ask users to paste seeds online; promote offline safe storage,Master Lab
+exercise,EX44 clipboard privacy assumption,clipboard can be sniffed; offer manual copy and shared-device warnings,Master Lab
+exercise,EX45 incomplete secret incident response,rotate revoke audit history and prevent repeat leaks,Master Lab
+exercise,EX46 API returns full internal state,minimize returned fields and test that secrets never reach UI returns,Master Lab
+exercise,EX47 false non-determinism claim,verify output diversity and block test-only seeds from release builds,Master Lab
+exercise,EX48 hybrid loop and security bug,fix unsafe flatten and remove secret-adjacent logging together,Master Lab
+exercise,EX49 defense in depth map for Code N2,combine CSPRNG hidden salt KDF passphrase structure controls and repo hygiene,Master Lab
+exercise,EX50 research mini proposal,define question methods threat model metrics and ethics without real-seed collection,Master Lab
