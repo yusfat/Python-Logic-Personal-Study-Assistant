@@ -1,0 +1,90 @@
+{
+  "wrong": [
+    {
+      "type": "decision",
+      "term": "Why start with a CLI version?",
+      "meaning": "It is simpler to build test and debug while learning the core logic",
+      "category": "Project Decision"
+    },
+    {
+      "type": "decision",
+      "term": "Why use a separate terms.csv file?",
+      "meaning": "To separate data from logic so terms can be updated without touching the Python code",
+      "category": "Design Decision"
+    },
+    {
+      "type": "question",
+      "term": "Why is medical terminology a good project domain?",
+      "meaning": "It has clear structure (prefix + root + suffix) and real educational value",
+      "category": "Project Choice"
+    },
+    {
+      "type": "decision",
+      "term": "Why track recently asked questions?",
+      "meaning": "To reduce repetition and make the quiz feel less predictable",
+      "category": "Logic"
+    },
+    {
+      "type": "decision",
+      "term": "Why allow flexible answer checking instead of exact match?",
+      "meaning": "Because students may write partially correct answers and strict matching would be too frustrating",
+      "category": "Learning Design"
+    },
+    {
+      "type": "concept",
+      "term": "Single Responsibility",
+      "meaning": "Each function should do one clear thing",
+      "category": "Design Principle"
+    },
+    {
+      "type": "decision",
+      "term": "Why store each term as a dictionary?",
+      "meaning": "So that one item can hold multiple related pieces of information (type term meaning category)",
+      "category": "Code Decision"
+    },
+    {
+      "type": "decision",
+      "term": "Why use a feature branch for big changes?",
+      "meaning": "To protect the working version and experiment safely",
+      "category": "Git Decision"
+    },
+    {
+      "type": "decision",
+      "term": "Why load the CSV only once at the start?",
+      "meaning": "To avoid reading the file repeatedly which would be slower and unnecessary",
+      "category": "Performance"
+    },
+    {
+      "type": "question",
+      "term": "What is the purpose of the load_terms() function?",
+      "meaning": "To read the CSV file and convert it into a list of dictionaries the rest of the program can use",
+      "category": "Code Understanding"
+    },
+    {
+      "type": "question",
+      "term": "How does the program know which questions are due for spaced repetition?",
+      "meaning": "It compares the saved next_review time with the current time",
+      "category": "Logic"
+    },
+    {
+      "type": "concept",
+      "term": "Control Flow",
+      "meaning": "Using while True + if-elif to control the program menu",
+      "category": "Python"
+    }
+  ],
+  "next_review": {
+    "Why start with a CLI version?": "2026-09-15T05:34:43.880639",
+    "Why use a separate terms.csv file?": "2026-09-15T05:34:43.887759",
+    "Why is medical terminology a good project domain?": "2026-09-15T05:34:43.887901",
+    "Why track recently asked questions?": "2026-09-15T05:34:43.887986",
+    "Why allow flexible answer checking instead of exact match?": "2026-09-15T05:34:43.888122",
+    "Single Responsibility": "2026-09-15T05:34:43.888213",
+    "Why store each term as a dictionary?": "2026-09-15T05:34:43.888469",
+    "Why use a feature branch for big changes?": "2026-09-15T05:34:43.888568",
+    "Why load the CSV only once at the start?": "2026-09-15T05:34:43.889043",
+    "What is the purpose of the load_terms() function?": "2026-09-15T05:34:43.889141",
+    "How does the program know which questions are due for spaced repetition?": "2026-09-15T05:34:43.889219",
+    "Control Flow": "2026-09-15T05:34:43.889529"
+  }
+}
