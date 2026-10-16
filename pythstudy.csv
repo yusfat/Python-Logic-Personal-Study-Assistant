@@ -57,3 +57,158 @@ question,Why are intermediate salts never displayed?,Because showing them would 
 question,What is the danger of a fixed switch point like if i < 200?,It creates a predictable structure that can be used as a fingerprint by attackers,Security
 challenge,Main challenge when designing custom derivation paths,Balancing strong obfuscation with the risk of creating detectable patterns,Challenge
 
+# Added on Oct 16, 2026 👇
+
+secret,API Keys (sk-...),Secret tokens starting with sk- that give full access to services if leaked,Secrets To Avoid
+secret,DB_PASSWORD,Database password that should never be pushed to GitHub,Secrets To Avoid
+secret,.env file,File containing all environment secrets should be in .gitignore,Secrets To Avoid
+secret,Private Keys (id_rsa / *.pem),SSH and SSL private keys that allow server access,Secrets To Avoid
+secret,Database URL,Connection string containing username password and host,Secrets To Avoid
+secret,Bearer JWT Access Token,JWT token that allows API access as a user,Secrets To Avoid
+secret,User Data (emails-phones),Personal user data like emails and phone numbers considered PII,Secrets To Avoid
+secret,AWS_SECRET,Cloud provider secret key for AWS access,Secrets To Avoid
+secret,Phone number +44,Example of PII that should not be committed,Secrets To Avoid
+secret,Email address,User email is sensitive personal data,Secrets To Avoid
+secret,Admin password,Admin credentials give full system control,Secrets To Avoid
+secret,Credit cards,Financial PII strictly forbidden in code,Secrets To Avoid
+secret,OAuth Client Secret,Secret used in OAuth flow to verify app identity,Secrets To Avoid
+secret,Webhook Secret,Secret to verify webhooks are from real source,Secrets To Avoid
+secret,Encryption Salt Keys,Keys used to hash passwords if leaked hashes can be reversed,Secrets To Avoid
+secret,JWT_SECRET,Secret used to sign session tokens,Secrets To Avoid
+secret,Stripe Payment Keys,Payment gateway keys that can charge customers,Secrets To Avoid
+secret,Firebase Config Private,Firebase private config allows full DB access,Secrets To Avoid
+secret,Internal IP Addresses,Internal infrastructure info helps attackers,Secrets To Avoid
+secret,Docker / Kubernetes Secrets,Secrets hardcoded in docker-compose.yml,DevOps Secrets
+secret,Git History,Risk that deleted secret still exists in old commits,Git Risk
+secret,Screenshots / Logs,console.log that accidentally prints tokens,Code Leak
+secret,Backup Files .env.bak,Backup copy of env file often pushed by mistake,File Leak
+secret,Mnemonic Seed Phrase 12-24 words,12-24 words that give full control of crypto wallet never share,Crypto Secret
+secret,Wallet Private Key,Hex private key that controls all crypto funds,Crypto Secret
+secret,wallet.dat file,File containing encrypted private keys for Bitcoin Core,Crypto Secret
+secret,Keystore JSON,JSON file with encrypted private key needs password to unlock,Crypto Secret
+secret,Passphrase,Extra word securing seed phrase,Crypto Secret
+secret,Exchange API Secret Binance Coinbase,Secret key for trading on exchanges,Crypto Secret
+secret,RPC URL with key Infura Alchemy,URL containing API key for blockchain node access,Crypto Secret
+secret,WALLET_PRIVATE_KEY in .env,Private key stored in env file still dangerous if file leaked,Crypto Secret
+command,cat,Concatenate and display file contents in terminal,Linux Command
+command,cat file.txt,Displays contents of file.txt,Linux Command
+command,cat > file.txt,Creates or overwrites file.txt with typed input,Linux Command
+command,cat >> file.txt,Appends typed input to end of file.txt,Linux Command
+command,cat file1 file2,Displays file1 then file2 combined,Linux Command
+command,cat << 'EOF',Here-doc starts multi-line input until EOF marker,Linux Command
+command,cat << 'PATCH' | patch,Feeds a patch from heredoc directly to patch command,Linux Command
+command,cat > .gitignore << EOF,Creates .gitignore file using heredoc,Linux Command
+command,diff,Compares two files line by line and shows differences,Linux Command
+command,diff file1 file2,Shows what changed between file1 and file2,Linux Command
+command,diff -u,Unified diff format with context shows with + and - ,Linux Command
+command,diff -u file1 file2 > fix.patch,Creates a patch file in unified format,Linux Command
+command,patch < fix.patch,Applies a patch file to current files,Linux Command
+decision,Why use .gitignore for secrets?,To prevent Git from tracking and pushing sensitive files to GitHub,Code Decision
+decision,Why check git log for secrets?,Because deleting file now does not delete it from old commits,Security Decision
+decision,Why use environment variables?,To keep secrets outside code and load them at runtime,Design Decision
+-------
+decision,Why use csv.DictReader instead of csv.reader?,Because DictReader automatically turns each row into a dictionary using the header names as keys,Code Decision
+decision,Why store each term as a dictionary?,So that one item can hold multiple related pieces of information (type term meaning category),Code Decision
+decision,Why put all terms into a list of dictionaries?,So the program can easily loop through them select random ones and filter by type,Code Decision
+decision,Why use a separate terms.csv file?,To separate data from logic so terms can be updated without touching the Python code,Design Decision
+concept,What is flattening?,Pouring bags inside a bag into one single flat tray,Loop Lesson
+concept,What is indentation in Python?,Indentation is meaning - space tells Python what is inside what,Indentation Lesson
+concept,What does for loop do?,Take one item at a time from a bag and run code for it,Loop Lesson
+concept,What does return do?,Hand back finished product from function - does not print by itself,Return Lesson
+concept,Difference between def and call?,def builds machine - calling with () switches it on,Function Lesson
+concept,Why does return inside loop cause bug?,Return inside stops after first bag only - return outside waits until all bags poured,Return Lesson
+concept,What happens if for classroom and for student aligned same level?,Python thinks second loop is outside first - it will only use last classroom not all,Indentation Lesson
+concept,Grade 5 example - Morning routine indentation,for house in street: for child in house: child.brush_teeth() - child must be inside house,Grade 5 Example
+concept,Grade 5 example - School flattening,school = [[Joy Mike] [Aisha Tunde]] flattened to [Joy Mike Aisha Tunde] - assembly ground,Grade 5 Example
+concept,Why does for one_toy in AB give A then B?,Because Python opens string as bag of characters,Loop Lesson
+concept,Why does flatten_pool break flag?,Because flag like flag CD is 2 chars len 2 - Python splits into half flags,Emoji Lesson
+concept,Why does flatten_pool break double space?,Because double space list with one item containing two spaces becomes two single spaces,Emoji Lesson
+concept,Country State LGA CDA Street House Person nesting,6 level nesting to practice loops - state contains LGA LGA contains CDA CDA contains streets,Project Task
+concept,What is shadowing variable?,Using same name for outer and inner loop like for emoji in pools and for flat_emoji in emoji swapped,Bug Lesson
+code,for small_bag in bags_inside_big_bag: for one_toy in small_bag: flat_tray.append(one_toy),Standard flatten - open big bag then open small bag then append,Flatten Pattern
+code,[small_thing for bag_inside in big_bag for small_thing in bag_inside],One-line flatten same as two for loops - fastest pythonic way,Flatten Pattern
+code,result.extend(list(item)),Opens item and pours contents - breaks flags and spaces,List Lesson
+code,result.append(item),Keeps whole item as one without opening,List Lesson
+code,Smart flatten with isinstance,if isinstance(item list) result.extend(item) else result.append(item) - keeps flags whole,Emoji Lesson
+code,import random and random.choice(flat_tray),Picks one random single noise fairly from flat tray,Generator Lesson
+code,pick_one_random(flat_emoji) + pick_one_random(flat_scripts),Build secret path by picking from different flat noise pools,Generator Lesson
+concept,What is emoji_stall?,Grouped emojis for easy typing like emoji groups,Generator Concept
+concept,What is script_stall?,Grouped letters like [ABC XYZ] for easy typing,Generator Concept
+concept,What is space_stall?,Grouped spaces like [double space tab newline],Generator Concept
+concept,Why flatten emoji_stall before picking?,Because picking directly from grouped stall picks whole stall - flatten makes single emoji pick fair,Generator Lesson
+concept,Relation of country task to generator task?,Country task counts persons with 6 loops - generator task picks noises with same 6 loop pattern,Project Link
+concept,Business problem same pattern?,Shop sales [[Joy][Mike]] flatten to one report - same code as emoji flatten,Business Example
+concept,Engineering problem same pattern?,Sensor batches [[temp 20][temp 21]] flatten to clean list - same loop indent return logic,Engineering Example
+tool,cat file.txt,Show whole file content in terminal,Linux Tool
+tool,cat > file.txt << EOF,Create new file by typing lines until EOF word,Linux Tool
+tool,cat >> file.txt,Append text to end of existing file,Linux Tool
+tool,cat file1 file2 > newfile,Join two files into one new file,Linux Tool
+tool,cat -n file.txt,Show file with line numbers,Linux Tool
+tool,cat patch file viewing,Use cat to view patch file then apply with patch command,Linux Tool
+tool,patch file.txt < changes.patch,Apply patch file to update file.txt,Linux Tool
+tool,diff file1 file2,Show differences between two files,Linux Tool
+tool,diff -u file1 file2,Show differences in unified format with context lines - used for creating patches,Linux Tool
+tool,diff -u old.py new.py > fix.patch,Create patch file showing what changed,Linux Tool
+tool,diff -r dir1 dir2,Compare two directories recursively,Linux Tool
+tool,cat file.txt | grep keyword,Filter file content for keyword using cat and grep,Linux Tool
+tool,ls,List files and folders in current directory,Linux Tool
+tool,ls -l,List with details - permissions owner size date,Linux Tool
+tool,ls -a,List all including hidden files starting with dot,Linux Tool
+tool,ls -lh,List with human readable sizes like 4K 2M,Linux Tool
+tool,ls -R,List recursively all folders and subfolders,Linux Tool
+tool,chmod +x file.py,Make file executable - allow to run as program,Linux Tool
+tool,chmod 644 file.txt,Set read write for owner read for others - common for files,Linux Tool
+tool,chmod 755 script.sh,Set read write execute for owner read execute for others - common for scripts,Linux Tool
+tool,chmod -R 755 folder,Change permission recursively for folder and all inside,Linux Tool
+tool,echo Hello,Print Hello in terminal,Linux Tool
+tool,echo text > file.txt,Write text into file overwriting old content,Linux Tool
+tool,echo text >> file.txt,Append text to end of file,Linux Tool
+tool,mkdir myfolder,Create new folder,Linux Tool
+tool,mkdir -p a/b/c,Create nested folders even if not exist,Linux Tool
+tool,rm file.txt,Delete file,Linux Tool
+tool,rm -r folder,Delete folder and all inside recursively,Linux Tool
+tool,rm -rf folder,Force delete folder without asking - dangerous,Linux Tool
+tool,pwd,Print working directory - where you are now,Linux Tool
+tool,cd folder,Change directory go into folder,Linux Tool
+tool,cd..,Go up one level to parent folder,Linux Tool
+tool,touch file.txt,Create empty file if not exist or update time if exists,Linux Tool
+tool,cp file1 file2,Copy file1 to file2,Linux Tool
+tool,cp -r dir1 dir2,Copy folder dir1 to dir2 recursively,Linux Tool
+tool,mv old.txt new.txt,Rename or move file,Linux Tool
+tool,grep keyword file.txt,Search for keyword inside file,Linux Tool
+tool,grep -r keyword folder,Search recursively for keyword in all files inside folder,Linux Tool
+tool,grep -i keyword file.txt,Case insensitive search,Linux Tool
+tool,head file.txt,Show first 10 lines of file,Linux Tool
+tool,head -n 20 file.txt,Show first 20 lines,Linux Tool
+tool,tail file.txt,Show last 10 lines,Linux Tool
+tool,tail -f log.txt,Follow file live as it grows - for logs,Linux Tool
+tool,wc -l file.txt,Count number of lines in file,Linux Tool
+tool,find. -name *.py,Find all python files from current folder down,Linux Tool
+exercise,CALL + PRINT exercise - flatten_pool returned nothing,You defined function but did not call it - need my_bags plus flatten_pool(my_bags) plus print,Pending Exercise
+exercise,Task 1 Count Everybody - country State LGA CDA Street House Person,6-level loop total plus equals 1 and return outside all loops,Pending Exercise
+exercise,Task 2 make_voter_register - flatten,Flatten country into one flat list Joy Mike Aisha using append inside loops,Pending Exercise
+exercise,Task 3 find_person_path country target_name,Loop through all levels if person equals target_name return address path,Pending Exercise
+exercise,Task 4 make_secret_house_code,Combine flatten_pool plus pick_one_random to give each person secret emoji code,Pending Exercise
+exercise,Task 5 build_country_report,One function returns total count plus flat list plus secret map,Pending Exercise
+exercise,Broken pick_one_random exercise - secret = pick_one_random(flat_emoji),Missing Step 1 where flat_emoji flat_scripts flat_spaces must be created before use - NameError,Pending Exercise
+exercise,Broken double for loop exercise - for flat_emoji in emoji: for emoji in pools,Big bag small bag order wrong and name clash and print outside loop,Pending Exercise
+exercise,Linux exercise 1 - build test folder,Use mkdir -p project/test plus touch project/test/file.txt plus ls -R project to verify,Linux Exercise
+exercise,Linux exercise 2 - patch workflow,Create old.txt with cat << EOF plus edit to new.txt plus diff -u old.txt new.txt > fix.patch plus cat fix.patch,Linux Exercise
+exercise,Hands-on Loop - Write flatten_pool long way,def flatten_pool(pool): result = [] for item in pool: result.extend(list(item)) return result - test with [[A B] [C]] must give [A B C],HandsOn Loop
+exercise,Hands-on Loop - Write flatten_pool short way,def flatten_pool(pool): return [char for item in pool for char in item] - same logic as long way,HandsOn Loop
+exercise,Hands-on Loop - Write flatten_pool with good names,def flatten_pool(big_bag): return [small_thing for bag_inside in big_bag for small_thing in bag_inside],HandsOn Loop
+exercise,Hands-on Indentation - Fix 2-level classroom bug,Given for classroom in school: for student in classroom: print(student) - what if second for not indented? Fix it,HandsOn Indentation
+exercise,Hands-on Indentation - Fix 3-level country bug,Given for state in country: for lga in state: for person in lga: print(person) - make each loop indented inside previous,HandsOn Indentation
+exercise,Hands-on Indentation - Spot return inside loop bug,def flatten(pool): result=[] for item in pool: for char in item: result.append(char) return result - return is inside first loop - move it outside,HandsOn Return
+exercise,Hands-on Flatten - Keep flag whole,Input [[emoji][flag CD]] normal flatten breaks flag - write smart flatten with if isinstance(item list) extend else append,HandsOn Flatten
+exercise,Hands-on Flatten - Double space case,Input [[double space][A]] normal flatten gives [space space A] - smart flatten should keep double space as one,HandsOn Flatten
+exercise,Hands-on Generator - Build flat noises step by step,Step1 flat_emoji = flatten_pool(emoji_stall) Step2 flat_scripts = flatten_pool(script_stall) Step3 pick = random.choice(flat_emoji),HandsOn Generator
+exercise,Hands-on Generator - Fix missing flat creation,Code secret = pick_one_random(flat_emoji) fails with NameError - because flat_emoji never created - add flat_emoji = flatten_pool(emoji_stall) before,HandsOn Generator
+exercise,Hands-on Generator - Fix name clash for flat_emoji in emoji,for flat_emoji in emoji: for emoji in pools: - rename to for big_bag in pools: for small_bag in big_bag: - avoid shadowing,HandsOn Generator
+exercise,Hands-on Generator - Put print inside or outside?,Loop makes secret each time but print outside shows only last one - indent print inside loop to see every secret,HandsOn Indentation
+exercise,Hands-on Debug - Add print inside flatten to see flow,Inside flatten_pool add print(item) before extend to see each bag being opened - helps beginners debug,HandsOn Debug
+exercise,Hands-on Linux + Code - Full workflow,Create terms.csv with cat << EOF then ls -l terms.csv then chmod 644 terms.csv then cat terms.csv then python3 quiz.py,HandsOn Workflow
+
+
+
+
