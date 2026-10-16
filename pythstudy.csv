@@ -209,6 +209,196 @@ exercise,Hands-on Generator - Put print inside or outside?,Loop makes secret eac
 exercise,Hands-on Debug - Add print inside flatten to see flow,Inside flatten_pool add print(item) before extend to see each bag being opened - helps beginners debug,HandsOn Debug
 exercise,Hands-on Linux + Code - Full workflow,Create terms.csv with cat << EOF then ls -l terms.csv then chmod 644 terms.csv then cat terms.csv then python3 quiz.py,HandsOn Workflow
 
+# had to paste in case some where dropped 🎉📚
+
+decision,Why use csv.DictReader instead of csv.reader?,Because DictReader automatically turns each row into a dictionary using the header names as keys,Code Decision
+decision,Why store each term as a dictionary?,So that one item can hold multiple related pieces of information (type term meaning category),Code Decision
+decision,Why put all terms into a list of dictionaries?,So the program can easily loop through them select random ones and filter by type,Code Decision
+decision,Why use a separate terms.csv or knowledge.csv file?,To separate data from logic so terms can be updated without touching the Python code,Design Decision
+decision,Why not hard-code the terms inside quiz.py?,Hard-coding makes the file long hard to maintain and difficult for non-programmers to update,Design Decision
+decision,Why use functions for almost everything?,To make the code organized reusable easier to test and easier to understand,Code Decision
+decision,Why use while True for the main menu?,So the program keeps running until the user deliberately chooses to exit,Code Decision
+decision,Why use try-except when asking for number of questions?,To prevent the program from crashing if the user types text instead of a number,Error Handling
+decision,Why track recently asked questions?,To reduce repetition and make the quiz feel less predictable,Logic
+decision,Why save progress in JSON instead of CSV?,JSON is better for nested structured data like lists of wrong answers and review dates,Code Decision
+decision,Why use random.sample instead of random.choice in a loop?,random.sample guarantees unique questions in one quiz round,Code Decision
+decision,Why make is_correct() a separate function?,So the same answer-checking logic can be reused in quiz reverse practice and spaced repetition,Code Decision
+decision,Why allow flexible answer checking instead of exact match?,Because students may write partially correct answers and strict matching would be too frustrating,Learning Design
+decision,Why start with a CLI version?,It is simpler to build test and debug while learning the core logic,Project Decision
+decision,Why keep main branch as the stable version?,So users always get the best working code when they clone the repository,Git Decision
+decision,Why use a feature branch for big changes?,To protect the working version and experiment safely,Git Decision
+decision,Why use a Personal Access Token?,GitHub no longer accepts account passwords for Git operations and tokens are safer,Security Decision
+decision,Why make the repository public later and not immediately?,So you can improve the README and code quality before showing it to the world,Project Decision
+decision,Why create a separate Active Recall trainer project?,So it can grow independently and serve as a learning tool without mixing with the main project,Project Decision
+decision,Why use clear() function?,To improve user experience by cleaning the screen between different sections,User Experience
+decision,Why load the CSV only once at the start?,To avoid reading the file repeatedly which would be slower and unnecessary,Performance
+decision,Why store wrong answers with a future review time?,To implement basic spaced repetition so difficult items appear again later,Learning Design
+decision,Why prefer CSV over SQLite in the first version?,CSV is simpler to edit and sufficient for learning and small data,Technology Choice
+decision,When should you move from CSV to SQLite?,When the data becomes large or you need more advanced querying and relationships,Technology Choice
+decision,Why replace hardcoded salt with secrets.token_bytes()?,Because a fixed salt weakens security against precomputation attacks and makes every generation less unique,Security Decision
+decision,Why prefer secrets.token_bytes over os.urandom?,It has the same security but clearly shows the intent that the value is security-sensitive and keeps the code consistent,Security Decision
+decision,Why use a random switch_point instead of fixed 200?,A fixed number of hardened levels creates a detectable fingerprint that attackers can exploit,Security Decision
+decision,Why keep Code N procedural instead of OOP?,For this size of tool procedural code is simpler clearer and easier to maintain,Design Decision
+decision,Why use .gitignore for secrets?,To prevent Git from tracking and pushing sensitive files to GitHub,Security Decision
+decision,Why check git log for secrets?,Because deleting a file now does not delete it from old commits,Security Decision
+decision,Why use environment variables?,To keep secrets outside code and load them at runtime,Design Decision
+decision,Why should main.py stay thin?,Because user interaction should not be mixed with cryptographic operations,Design Decision
+decision,Why split PathGen into several files?,To separate constants pools crypto logic path construction and user interface for clarity and maintainability,Design Decision
+decision,Why keep noise after numbers never before?,Putting noise before digits can break derivation-path compatibility with wallets,Security Decision
+decision,Why is visual noise only secondary security?,Because emojis and scripts mainly obfuscate while real strength comes from randomness stretching and secrets,Security Decision
+concept,Separation of Concerns,Keeping different responsibilities such as data logic and interface in different places,Design Principle
+concept,Single Responsibility,Each function should do one clear thing,Design Principle
+concept,Data Structure Choice,Choosing list of dictionaries because each term has multiple attributes,Data Structures
+concept,Control Flow,Using while True and if-elif to control the program menu,Python
+concept,Error Prevention,Using try-except and checks to stop the program from crashing,Error Handling
+concept,Persistence,Saving data to JSON so progress survives after the program closes,File Handling
+concept,Active Recall Trainer Purpose,To force deep understanding of every decision and concept used in the project,Learning
+concept,Systems Thinking in this project,Understanding how data logic user experience and learning science work together,Thinking
+concept,Hardcoded Salt Risk,Using a fixed string as salt reduces uniqueness and makes offline attacks easier,Security
+concept,Non-Deterministic Generation,Every run produces different output so the exact path cannot be predicted in advance,Security
+concept,Path Fingerprinting,When a generator always follows the same structural pattern it becomes easier to recognize,Security
+concept,PBKDF2 vs Argon2id,PBKDF2 is widely supported but not memory-hard while Argon2id is stronger against GPU attacks,Cryptography
+concept,Separation of Concerns in PathGen,Pools crypto generation and user interface are kept in different files,Design Principle
+concept,Internal Salt,A secret value created by the program that the user never sees and that helps make outputs non-deterministic,Security
+concept,Real Security vs Obfuscation,Real security comes from strong randomness and key stretching while emojis and noise are only obfuscation,Security
+concept,Key Stretching,Making a value slower and more expensive to brute force using PBKDF2 or Argon2id,Cryptography
+concept,Environment Variable,A value stored outside source code in the OS environment and read at runtime,Security
+concept,Supply Chain Risk,Attackers compromising developer accounts or packages so users receive malicious code,Security
+concept,What is flattening?,Converting nested lists into one flat list of items,Loop Lesson
+concept,What is indentation in Python?,Indentation defines block structure and tells Python what code belongs inside what,Indentation Lesson
+concept,What does for loop do?,It takes one item at a time from an iterable and runs the indented block for each item,Loop Lesson
+concept,What does return do?,It hands a value back from a function and immediately exits the function,Return Lesson
+concept,Difference between def and call?,def defines a function machine and calling with parentheses runs it,Function Lesson
+concept,Why does return inside loop cause bug?,Because return exits the function immediately so remaining iterations never run,Return Lesson
+concept,What happens if nested loops are aligned at same level?,Python treats the second loop as outside the first so nesting behavior breaks,Indentation Lesson
+concept,Grade 5 example - Morning routine indentation,for house in street: for child in house: child.brush_teeth() means child actions stay inside each house,Grade 5 Example
+concept,Grade 5 example - School flattening,school = [[Joy Mike] [Aisha Tunde]] flattens to [Joy Mike Aisha Tunde],Grade 5 Example
+concept,Why does for one_toy in AB give A then B?,Because Python iterates a string as individual characters,Loop Lesson
+concept,Why does flatten_pool break flag with extend(list(item))?,Because list() over a multi-codepoint emoji or flag splits it into separate code points,Emoji Lesson
+concept,Why does flatten_pool break double space with extend(list(item))?,Because a string of two spaces becomes two separate one-space characters,Emoji Lesson
+concept,Country State LGA CDA Street House Person nesting,Six-level nesting practice where each level contains the next,Project Task
+concept,What is shadowing variable?,Reusing the same name for outer and inner loop variables and accidentally overwriting meaning,Bug Lesson
+concept,What is emoji_stall?,A grouped collection of emojis before flattening into individual choices,Generator Concept
+concept,What is script_stall?,A grouped collection of script characters before flattening,Generator Concept
+concept,What is space_stall?,A grouped collection of space-like characters before flattening,Generator Concept
+concept,Why flatten emoji_stall before picking?,So random choice selects one emoji not a whole group,Generator Lesson
+concept,Relation of country task to generator task?,Both use nested loop thinking: one counts nested people and the other processes nested noise pools,Project Link
+concept,Business problem same pattern?,Nested shop sales lists can be flattened into one report with the same loop pattern,Business Example
+concept,Engineering problem same pattern?,Nested sensor batches can be flattened into one clean list with the same loop and return rules,Engineering Example
+question,What is the purpose of the load_terms() or load_knowledge() function?,To read the CSV file and convert it into a list of dictionaries the rest of the program can use,Code Understanding
+question,What would break if you remove the header row from knowledge.csv?,csv.DictReader would not know the column names and the program would fail or behave incorrectly,Code Understanding
+question,Why do we check len(user) < 3 in is_correct()?,To reject very short or empty answers that are almost certainly wrong,Logic
+question,What is the danger of working directly on the main branch?,You can easily break the stable version of the project,Git
+question,Why should commit messages be clear and professional?,Because they become part of the public history of the project,Git
+question,What is the benefit of a good README?,It helps other people understand and use your project quickly,Documentation
+question,Why is medical terminology a good project domain?,It has clear structure (prefix + root + suffix) and real educational value,Project Choice
+question,What is the biggest limitation of the current Medical Terminology Assistant?,It is still command-line only and not user-friendly for non-technical medical students,Project Evaluation
+question,How does the program know which questions are due for spaced repetition?,It compares the saved next_review time with the current time,Logic
+question,What does make_system_salt() do?,It creates a strong internal random salt that is never shown to the user and is used to stretch material,Code Understanding
+question,Why are intermediate salts never displayed?,Because showing them would reduce security and defeat the purpose of internal stretching,Security
+question,What is the danger of a fixed switch point like if i < 200?,It creates a predictable structure that can be used as a fingerprint by attackers,Security
+question,Where is the real security in Code N2?,In secure randomness internal salt key stretching and optional passphrase,Security
+question,What should the user never see in Code N2?,The system salt intermediate stretched values and internal HMAC material,Security
+challenge,Main challenge when connecting CSV to Python,Making sure the code remains flexible when the CSV content changes,Challenge
+challenge,Why was answer checking difficult to get right?,Because too loose checking accepts wrong answers and too strict checking frustrates users,Challenge
+challenge,Main challenge when designing custom derivation paths,Balancing strong obfuscation with the risk of creating detectable patterns,Challenge
+secret,API Keys (sk-...),Secret tokens starting with sk- that give full access to services if leaked,Secrets To Avoid
+secret,DB_PASSWORD,Database password that should never be pushed to GitHub,Secrets To Avoid
+secret,.env file,File containing environment secrets and should be listed in .gitignore,Secrets To Avoid
+secret,Private Keys (id_rsa / *.pem),SSH and SSL private keys that allow server access,Secrets To Avoid
+secret,Database URL,Connection string containing username password and host,Secrets To Avoid
+secret,Bearer JWT Access Token,JWT token that allows API access as a user,Secrets To Avoid
+secret,User Data (emails-phones),Personal user data such as emails and phone numbers considered PII,Secrets To Avoid
+secret,AWS_SECRET,Cloud provider secret key for AWS access,Secrets To Avoid
+secret,Phone number +44,Example of PII that should not be committed,Secrets To Avoid
+secret,Email address,User email is sensitive personal data,Secrets To Avoid
+secret,Admin password,Admin credentials that give full system control,Secrets To Avoid
+secret,Credit cards,Financial PII strictly forbidden in code,Secrets To Avoid
+secret,OAuth Client Secret,Secret used in OAuth flow to verify app identity,Secrets To Avoid
+secret,Webhook Secret,Secret used to verify webhooks are from a real source,Secrets To Avoid
+secret,Encryption Salt Keys,Keys used in password hashing workflows that must remain protected,Secrets To Avoid
+secret,JWT_SECRET,Secret used to sign session tokens,Secrets To Avoid
+secret,Stripe Payment Keys,Payment gateway keys that can charge customers,Secrets To Avoid
+secret,Firebase Config Private,Firebase private config that can allow broad backend access,Secrets To Avoid
+secret,Internal IP Addresses,Internal infrastructure details that can help attackers map systems,Secrets To Avoid
+secret,Docker / Kubernetes Secrets,Secrets hardcoded in compose or cluster manifests,DevOps Secrets
+secret,Git History,Risk that a deleted secret still exists in old commits,Git Risk
+secret,Screenshots / Logs,Logs or screenshots that accidentally expose tokens,Code Leak
+secret,Backup Files .env.bak,Backup copy of an env file often committed by mistake,File Leak
+secret,Mnemonic Seed Phrase 12-24 words,12-24 words that give full control of a crypto wallet and must never be shared,Crypto Secret
+secret,Wallet Private Key,Hex private key that controls crypto funds,Crypto Secret
+secret,wallet.dat file,File containing wallet key material for Bitcoin Core style wallets,Crypto Secret
+secret,Keystore JSON,JSON file with encrypted private key material that still needs strong protection,Crypto Secret
+secret,Passphrase,Extra secret used with a seed phrase for added protection,Crypto Secret
+secret,Exchange API Secret Binance Coinbase,Secret key for trading APIs on exchanges,Crypto Secret
+secret,RPC URL with key Infura Alchemy,URL containing an API key for blockchain node access,Crypto Secret
+secret,WALLET_PRIVATE_KEY in .env,Private key stored in env still dangerous if the file leaks,Crypto Secret
+tool,cat file.txt,Display the contents of file.txt,Linux Tool
+tool,cat > file.txt,Create or overwrite file.txt with typed input,Linux Tool
+tool,cat >> file.txt,Append typed input to the end of file.txt,Linux Tool
+tool,cat file1 file2,Display file1 then file2 as combined output,Linux Tool
+tool,cat file1 file2 > newfile,Join two files into one new file,Linux Tool
+tool,cat -n file.txt,Show file contents with line numbers,Linux Tool
+tool,cat << 'EOF',Start a heredoc multi-line input block ending at EOF,Linux Tool
+tool,cat > file.txt << 'EOF',Create a file from multi-line heredoc input until EOF,Linux Tool
+tool,cat >> file.txt << 'EOF',Append multi-line heredoc input to an existing file until EOF,Linux Tool
+tool,cat > .gitignore << 'EOF',Create a .gitignore file quickly using heredoc,Linux Tool
+tool,diff file1 file2,Show line-by-line differences between two files,Linux Tool
+tool,diff -u file1 file2,Show unified diff with context using + and - markers,Linux Tool
+tool,diff -u old.py new.py > fix.patch,Create a patch file from changes between old and new versions,Linux Tool
+tool,patch < fix.patch,Apply a patch file to update current files,Linux Tool
+tool,patch file.txt < changes.patch,Apply a patch specifically to file.txt,Linux Tool
+tool,cat fix.patch,Inspect a patch before applying it,Linux Tool
+tool,cat << 'PATCH' | patch,Feed a heredoc patch directly into patch without saving a file first,Linux Tool
+tool,ls,List files and folders in the current directory,Linux Tool
+tool,ls -l,List with permissions owner size and date,Linux Tool
+tool,ls -a,List all files including hidden dotfiles,Linux Tool
+tool,ls -lh,List with human-readable sizes,Linux Tool
+tool,ls -R,List recursively through subfolders,Linux Tool
+tool,chmod +x file.py,Make a file executable,Linux Tool
+tool,chmod 644 file.txt,Owner read/write others read only,Linux Tool
+tool,chmod 755 script.sh,Owner full access others read/execute,Linux Tool
+tool,pwd,Print the current working directory,Linux Tool
+tool,cd folder,Change into a folder,Linux Tool
+tool,cd ..,Move up one directory level,Linux Tool
+tool,mkdir myfolder,Create a new folder,Linux Tool
+tool,mkdir -p a/b/c,Create nested folders as needed,Linux Tool
+tool,rm file.txt,Delete a file,Linux Tool
+tool,rm -r folder,Delete a folder and its contents recursively,Linux Tool
+tool,cp file1 file2,Copy a file,Linux Tool
+tool,cp -r dir1 dir2,Copy a folder recursively,Linux Tool
+tool,mv old.txt new.txt,Rename or move a file,Linux Tool
+tool,touch file.txt,Create an empty file or update its timestamp,Linux Tool
+tool,echo text > file.txt,Write text into a file overwriting old content,Linux Tool
+tool,echo text >> file.txt,Append text to the end of a file,Linux Tool
+tool,grep keyword file.txt,Search for a keyword inside a file,Linux Tool
+tool,cat file.txt | grep keyword,Filter file content for a keyword using a pipe,Linux Tool
+code,for small_bag in bags: for one_toy in small_bag: flat.append(one_toy),Standard nested-loop flatten pattern,Flatten Pattern
+code,[x for bag in bags for x in bag],One-line list comprehension flatten pattern,Flatten Pattern
+code,result.extend(list(item)),Opens a string into characters and can break flags or multi-character tokens,List Lesson
+code,result.append(item),Keeps a whole item intact without splitting it,List Lesson
+code,if isinstance(item list): result.extend(item) else: result.append(item),Smart flatten that only expands real lists,Emoji Lesson
+
+# 🎉 Exercises 
+exercise,EX1 Early return in nested loop,"Broken: def flatten(bags): flat=[] for bag in bags: for x in bag: flat.append(x); return flat | Symptom: only first bag is processed | Cause: return is inside outer loop | Fix: dedent return to function level",Debug Lab
+exercise,EX2 append vs extend on strings,"Broken: out.extend(list(token)) on emoji/flag/string tokens | Symptom: token splits into pieces | Cause: list(string) yields characters | Fix: append whole string unless item is a list",Debug Lab
 
 
-
+exercise,EX3 Hardcoded salt leak,"Broken: salt=b'advanced_path_generator_v200' and print(salt) | Symptom: same salt pattern and secret leakage | Cause: fixed salt plus debug output | Fix: secrets.token_bytes(32) and remove print",Security Lab
+exercise,EX4 DictReader without header,"Broken: knowledge.csv has no header row | Symptom: wrong keys or crash/odd behavior | Cause: DictReader expects header names | Fix: keep header type,term,meaning,category",Data Lab
+exercise,EX5 JSON progress key error,"Broken: progress['wrong'] used before ensuring structure | Symptom: KeyError on first run | Cause: missing default structure | Fix: load with default {wrong:[], next_review:{}}",Data Lab
+exercise,EX6 Off-by-one path levels,"Broken: for i in range(levels): if i <= switch_point | Symptom: one extra hardened level | Cause: wrong comparison boundary | Fix: use i < switch_point consistently",Logic Lab
+exercise,EX7 Noise before digits,"Broken: piece = noise + number + \"'\" | Symptom: wallet path rejection or invalid index parsing | Cause: noise placed before digits | Fix: number first then optional hardening mark then noise",Security Lab
+exercise,EX8 Shadowed loop variable,"Broken: for emoji in pools: for emoji in emoji: ... | Symptom: confusing results or type errors | Cause: inner variable overwrites outer name | Fix: use distinct names such as group and item",Bug Lab
+exercise,EX9 try-except missing on int(input),"Broken: num=int(input(...)) with no try | Symptom: crash when user types text | Cause: ValueError on invalid int | Fix: try-except and fallback default",Error Handling Lab
+exercise,EX10 Main branch direct experiments,"Broken process: commit experimental breaks straight to main | Symptom: stable project becomes unusable | Cause: no isolation of risky work | Fix: use feature branch then merge after test",Git Lab
+exercise,EX11 Secret committed then deleted,"Broken process: commit .env then delete file later | Symptom: secret still recoverable from history | Cause: git history retains old blobs | Fix: rotate secret and clean history if needed",Security Lab
+exercise,EX12 cat heredoc create gitignore,"Task: create .gitignore containing .env and __pycache__/ using cat and EOF | Correct pattern: cat > .gitignore << 'EOF' then lines then EOF | Why: quick safe file creation without interactive editor",Linux Lab
+exercise,EX13 diff then patch workflow,"Task: old.py to new.py changes must be saved and applied | Steps: diff -u old.py new.py > fix.patch | cat fix.patch | patch < fix.patch | Why: review changes before applying",Linux Lab
+exercise,EX14 cat heredoc piped to patch,"Task: apply a small patch without saving patch file | Pattern: cat << 'PATCH' | patch then patch body then PATCH | Why: fast inline repair in terminal workflows",Linux Lab
+exercise,EX15 Combined cat diff patch recovery,"Scenario: broken config needs reproducible fix | Steps: 1) copy backup 2) edit 3) diff -u backup config > fix.patch 4) cat fix.patch 5) patch < fix.patch | Why: creates auditable repair trail",Linux Lab
+exercise,EX16 Nested loop counting persons,"Task: count people in country->state->lga->cda->street->house->person structure | Bug form: return inside middle loop | Fix: accumulate fully then return once | Why: tests deep nesting discipline",Loop Lab
+exercise,EX17 Flatten stall before random pick,"Broken: random.choice(emoji_stall) where stall is nested groups | Symptom: whole group selected | Cause: choice on nested structure | Fix: flatten first then choice on flat list",Generator Lab
+exercise,EX18 Thin UI vs crypto mix,"Broken: main.py contains pbkdf2 and path building inline | Symptom: hard to test and easy to leak secrets in UI layer | Cause: mixed responsibilities | Fix: move crypto to crypto.py and keep main thin",Design Lab
+exercise,EX19 Predictable switch point,"Broken: if i < 200 always hardened | Symptom: structural fingerprint | Cause: fixed pattern every run | Fix: random switch_point in a range",Security Lab
+exercise,EX20 Flexible answer checker edge,"Broken: is_correct accepts any answer containing one short common word | Symptom: false positives | Cause: overly loose matching | Fix: require minimum length and stronger overlap rules",Logic Lab
