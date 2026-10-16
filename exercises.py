@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 """
-Code P exercises (EX1-EX50)
+Code P Exercises EX1-EX50
 Rules:
-- Each answer graded: Correct / Partially correct / Incorrect
-- Model answer shown ONLY on attempt 5
-- Attempt 4 with score < 0.50 is rejected
+1) Every attempt gets Correct / Partially correct / Incorrect
+2) Model answer shows ONLY on attempt 5
+3) Attempt 4 with score < 50% is rejected
 """
 
 import os
@@ -12,227 +12,690 @@ import json
 import random
 from datetime import datetime
 
-EX_PROGRESS_FILE = "exercise_progress.json"
+EXERCISE_PROGRESS_FILE = "exercise_progress.json"
 
 
-def clear():
+def clear_screen():
     os.system("clear" if os.name != "nt" else "cls")
 
 
-def load_progress():
-    if os.path.exists(EX_PROGRESS_FILE):
+def load_exercise_progress():
+    if os.path.exists(EXERCISE_PROGRESS_FILE):
         try:
-            with open(EX_PROGRESS_FILE, encoding="utf-8") as f:
-                return json.load(f)
+            with open(EXERCISE_PROGRESS_FILE, encoding="utf-8") as progress_file:
+                return json.load(progress_file)
         except Exception:
             pass
     return {"attempts": {}, "scores": {}, "completed": []}
 
 
-def save_progress(data):
-    with open(EX_PROGRESS_FILE, "w", encoding="utf-8") as f:
-        json.dump(data, f, indent=2)
+def save_exercise_progress(progress_data):
+    with open(EXERCISE_PROGRESS_FILE, "w", encoding="utf-8") as progress_file:
+        json.dump(progress_data, progress_file, indent=2)
 
 
-def grade_answer(user_answer: str, expected: str) -> float:
-    """Return correctness ratio 0.0 .. 1.0"""
-    user = user_answer.strip().lower()
-    exp = expected.strip().lower()
-    if not user:
+def grade_student_answer(student_answer, model_answer):
+    student_text = student_answer.strip().lower()
+    model_text = model_answer.strip().lower()
+    if not student_text or len(student_text) < 3:
         return 0.0
-    if len(user) < 3:
-        return 0.0
-    if user == exp:
+    if student_text == model_text:
         return 1.0
-    if user in exp or exp in user:
+    if student_text in model_text or model_text in student_text:
         return 0.85
-
-    user_words = {w for w in user.replace(".", " ").replace(",", " ").split() if len(w) > 2}
-    exp_words = {w for w in exp.replace(".", " ").replace(",", " ").split() if len(w) > 2}
-    if not exp_words:
+    student_words = {word for word in student_text.replace(".", " ").replace(",", " ").split() if len(word) > 2}
+    model_words = {word for word in model_text.replace(".", " ").replace(",", " ").split() if len(word) > 2}
+    if not model_words:
         return 0.0
-    overlap = len(user_words & exp_words)
-    ratio = overlap / max(len(exp_words), 1)
-    # clamp
-    if ratio > 1:
-        ratio = 1.0
-    return ratio
+    same_words = len(student_words & model_words)
+    return min(1.0, same_words / max(len(model_words), 1))
 
 
-def label_score(score: float) -> str:
-    if score >= 0.80:
+def score_label(score_ratio):
+    if score_ratio >= 0.80:
         return "Correct"
-    if score >= 0.50:
+    if score_ratio >= 0.50:
         return "Partially correct"
     return "Incorrect"
 
 
-def practice_one(ex):
-    """
-    Critical attempt logic:
-    - feedback every attempt
-    - model answer only at attempt 5
-    - attempt 4 below 50% rejected
-    """
-    clear()
-    print(f"{ex['id']} - {ex['title']} ({ex['level']})")
+def practice_one_exercise(exercise_data):
+    clear_screen()
+    print(f"{exercise_data['id']} - {exercise_data['title']} ({exercise_data['level']})")
     print("\nBROKEN / TASK CODE:")
-    print(ex["broken"])
+    print(exercise_data["broken_code_text"])
     print("\nSYMPTOM / SCENARIO:")
-    print(ex["symptom"])
+    print(exercise_data["symptom_text"])
     print("\nTASKS:")
-    for i, t in enumerate(ex["tasks"], 1):
-        print(f"{i}. {t}")
+    for task_number, task_text in enumerate(exercise_data["task_list"], 1):
+        print(f"{task_number}. {task_text}")
 
-    expected = ex["answer"]
-    progress = load_progress()
-    attempt = 0
-    best = 0.0
+    model_answer_text = exercise_data["model_answer_text"]
+    progress_data = load_exercise_progress()
+    attempt_number = 0
+    best_score_ratio = 0.0
 
-    while attempt < 5:
-        attempt += 1
-        print(f"\n--- Attempt {attempt}/5 ---")
-        ans = input("Your solution/explanation:\n> ").strip()
-        score = grade_answer(ans, expected)
-        best = max(best, score)
-        print(f"Result: {label_score(score)} ({int(score * 100)}%)")
+    while attempt_number < 5:
+        attempt_number += 1
+        print(f"\n--- Attempt {attempt_number}/5 ---")
+        student_answer = input("Your solution/explanation:\n> ").strip()
+        score_ratio = grade_student_answer(student_answer, model_answer_text)
+        best_score_ratio = max(best_score_ratio, score_ratio)
+        print(f"Result: {score_label(score_ratio)} ({int(score_ratio * 100)}%)")
 
-        # Attempt 4 rejection rule
-        if attempt == 4 and score < 0.50:
+        if attempt_number == 4 and score_ratio < 0.50:
             print("Rejected on 4th attempt (< 50% correctness). Try again.")
-            # do not consume as successful finish; allow a replacement 4th try
-            attempt -= 1
+            attempt_number -= 1
             continue
 
-        # Model answer ONLY on 5th attempt
-        if attempt >= 5:
+        if attempt_number >= 5:
             print("\nMODEL ANSWER:")
-            print(expected)
+            print(model_answer_text)
             break
 
         print("Model answer is locked until attempt 5.")
 
-    # persistence
-    progress["attempts"][ex["id"]] = progress.get("attempts", {}).get(ex["id"], 0) + attempt
-    prev = progress.get("scores", {}).get(ex["id"], 0)
-    progress.setdefault("scores", {})[ex["id"]] = max(prev, best)
-    if best >= 0.80 and ex["id"] not in progress.get("completed", []):
-        progress.setdefault("completed", []).append(ex["id"])
-    progress["last_update"] = datetime.now().isoformat()
-    save_progress(progress)
+    progress_data.setdefault("attempts", {})
+    progress_data.setdefault("scores", {})
+    progress_data.setdefault("completed", [])
+    progress_data["attempts"][exercise_data["id"]] = (
+        progress_data["attempts"].get(exercise_data["id"], 0) + attempt_number
+    )
+    previous_best = progress_data["scores"].get(exercise_data["id"], 0)
+    progress_data["scores"][exercise_data["id"]] = max(previous_best, best_score_ratio)
+    if best_score_ratio >= 0.80 and exercise_data["id"] not in progress_data["completed"]:
+        progress_data["completed"].append(exercise_data["id"])
+    progress_data["last_update"] = datetime.now().isoformat()
+    save_exercise_progress(progress_data)
 
-    print(f"\nSaved. Best score for {ex['id']}: {int(best * 100)}%")
+    print(f"\nSaved. Best score for {exercise_data['id']}: {int(best_score_ratio * 100)}%")
     input("Press Enter...")
 
 
 EXERCISES = [
-    # -------- EX1-EX20 core --------
-    {"id":"EX1","title":"Early return in nested loop","level":"Beginner","broken":"def flatten(bags):\n    flat=[]\n    for bag in bags:\n        for x in bag:\n            flat.append(x)\n        return flat\n","symptom":"Only first bag processed","tasks":["Find bug","Explain","Minimal fix"],"answer":"return is inside outer loop so function exits early. Dedent return to function level after both loops."},
-    {"id":"EX2","title":"append vs extend on strings","level":"Intermediate","broken":"out.extend(list(token)) for token in items","symptom":"Flags/tokens split into characters","tasks":["Why split?","When extend is correct","Safe fix"],"answer":"list(string) yields characters. extend expands iterable. append whole string; extend only real lists."},
-    {"id":"EX3","title":"Hardcoded salt + print leak","level":"Intermediate","broken":"salt=b'advanced_path_generator_v200'; print(salt)","symptom":"Shared salt pattern and secret leakage","tasks":["Two problems","Minimal patch","What never to show"],"answer":"Hardcoded salt and debug leak. Use secrets.token_bytes(32), remove print. Never show internal salt or intermediates."},
-    {"id":"EX4","title":"DictReader without header","level":"Beginner","broken":"CSV without header used by DictReader","symptom":"Wrong keys/odd behavior","tasks":["What header is required","What breaks","Correct header"],"answer":"DictReader needs header names. Without header first row becomes keys. Use type,term,meaning,category."},
-    {"id":"EX5","title":"JSON progress KeyError","level":"Beginner","broken":"progress['wrong'].append(...) with default {}","symptom":"KeyError on first run","tasks":["Why","Safe default","Rewrite loader"],"answer":"Default {} lacks keys. Use {'wrong': [], 'next_review': {}}."},
-    {"id":"EX6","title":"Off-by-one switch point","level":"Intermediate","broken":"if i <= switch_point","symptom":"One extra hardened level","tasks":["Boundary bug","Which indexes","Fix compare"],"answer":"<= hardens one extra index. Use i < switch_point."},
-    {"id":"EX7","title":"Noise before digits","level":"Intermediate","broken":"piece = noise + number + \"'\"","symptom":"Invalid path parsing risk","tasks":["Why dangerous","Correct order","Rule"],"answer":"Digits must come first. Order: number, optional ', then noise."},
-    {"id":"EX8","title":"Shadowed loop variable","level":"Intermediate","broken":"for emoji in pools:\n  for emoji in emoji:","symptom":"Fragile confusing logic","tasks":["Define shadowing","Rename","Risk"],"answer":"Inner name overwrites outer. Use group/item names."},
-    {"id":"EX9","title":"Missing try-except int(input)","level":"Beginner","broken":"num=int(input(...))","symptom":"ValueError on text","tasks":["Exception","Wrap","Default"],"answer":"Catch ValueError and fallback default e.g. 10."},
-    {"id":"EX10","title":"Direct experimental commits on main","level":"Process","broken":"commit breaks directly on main","symptom":"Stable branch ruined","tasks":["Why bad","Safer flow","When merge"],"answer":"Use feature branch, test, then merge to main."},
-    {"id":"EX11","title":"Secret committed then deleted","level":"Security","broken":"commit .env then delete file","symptom":"Secret remains in history","tasks":["Why not enough","What to do to secret","Prevention"],"answer":"Rotate secret; history still has it. .gitignore and env vars."},
-    {"id":"EX12","title":"cat heredoc .gitignore","level":"Linux","broken":"echo .env > .gitignore only","symptom":"Incomplete ignore rules","tasks":["Write heredoc command","Include key entries","Why heredoc"],"answer":"cat > .gitignore << 'EOF' ... EOF with .env __pycache__/ venv/."},
-    {"id":"EX13","title":"diff then patch workflow","level":"Linux","broken":"no patch trail for edits","symptom":"No auditable repair","tasks":["Create patch","Inspect","Apply"],"answer":"diff -u old new > fix.patch; cat fix.patch; patch < fix.patch"},
-    {"id":"EX14","title":"heredoc piped to patch","level":"Linux","broken":"need inline patch no file","symptom":"Unknown inline pattern","tasks":["Write pattern","Risk","Benefit"],"answer":"cat << 'PATCH' | patch ... PATCH. Fast but risky without review."},
-    {"id":"EX15","title":"Combined cat/diff/patch recovery","level":"Linux","broken":"broken config no trail","symptom":"Ad-hoc irreparable edits","tasks":["Ordered steps","Why order matters"],"answer":"backup, edit, diff -u backup edited > fix.patch, review with cat, apply patch."},
-    {"id":"EX16","title":"Deep nested count early return","level":"Intermediate","broken":"return inside middle nested loop","symptom":"Undercount","tasks":["Find return level","Fix","Link to flatten"],"answer":"Return too deep. Accumulate all levels then return once."},
-    {"id":"EX17","title":"Nested stall random.choice","level":"Intermediate","broken":"random.choice(nested_groups)","symptom":"Whole group selected","tasks":["Why","Flatten then choose","Generator link"],"answer":"choice picks top-level list. Flatten first."},
-    {"id":"EX18","title":"Thin UI violated","level":"Design","broken":"pbkdf2 and path build inside main.py","symptom":"Hard to audit/test","tasks":["Principle violated","File split","Role of main"],"answer":"Separation of concerns. crypto.py/generator.py; main coordinates only."},
-    {"id":"EX19","title":"Fixed switch point fingerprint","level":"Security","broken":"if i < 200 always","symptom":"Predictable structure","tasks":["Why fingerprint","Random switch","Attacker advantage"],"answer":"Fixed pattern is detectable. Use random switch_point range."},
-    {"id":"EX20","title":"Loose is_correct false positives","level":"Logic","broken":"return user in correct with no min length","symptom":"Weak answers pass","tasks":["False positive example","Min length","Tighten rule"],"answer":"Require len>=3 and stronger token overlap."},
+    {
+        "id": "EX1",
+        "title": "Early return in nested loop",
+        "level": "Beginner",
+        "broken_code_text": '''def flatten_bags(list_of_bags):
+    flat_list = []
+    for one_bag in list_of_bags:
+        for one_item in one_bag:
+            flat_list.append(one_item)
+        return flat_list
 
-    # -------- EX21-EX35 advanced --------
-    {"id":"EX21","title":"PBKDF2 iterations too low","level":"Advanced","broken":"pbkdf2_hmac(..., 1000)","symptom":"Fast brute force","tasks":["Why weak","Choose stronger setting","Tradeoff"],"answer":"Low iterations are cheap to attack. Use high iteration count; slower but safer."},
-    {"id":"EX22","title":"Returning internal salt to UI","level":"Advanced","broken":"return salt, stretched and print both","symptom":"Secret surface expanded","tasks":["Why bad","What to return","Least privilege"],"answer":"Return only what next step needs. Never expose internal salt to UI/logs."},
-    {"id":"EX23","title":"Predictable path ending always same","level":"Advanced","broken":"always force identical large suffix pattern","symptom":"Structural fingerprint","tasks":["Identify leak","What can stay fixed","What should vary"],"answer":"Keep compatibility constraints minimal; avoid unnecessary fixed long patterns."},
-    {"id":"EX24","title":"Env var missing handling","level":"Advanced","broken":"os.environ['APP_PEPPER'] with no check","symptom":"KeyError crash","tasks":["Safer read","Fail closed?","Message quality"],"answer":"Use get() and raise clear config error if required secret absent."},
-    {"id":"EX25","title":".env committed in repo","level":"Advanced","broken":"git add .env","symptom":"Secret exposure risk","tasks":["Immediate actions","Repo controls","Future prevention"],"answer":"Rotate secrets, remove from tracking, add .gitignore, protect branch."},
-    {"id":"EX26","title":"Feature branch not used","level":"Advanced","broken":"all work on main","symptom":"No safe experimentation","tasks":["Describe branch flow","PR review value","Main protection"],"answer":"Develop on feature branch, review, merge. Protect main."},
-    {"id":"EX27","title":"Clipboard code not optional","level":"Advanced","broken":"always call termux-clipboard-set","symptom":"Fails on desktop Linux","tasks":["Portability issue","Fallback design","Detection approach"],"answer":"Wrap clipboard in try/except or platform check; fallback to manual copy."},
-    {"id":"EX28","title":"HMAC used with non-secret key material","level":"Advanced","broken":"hmac.new(b'public', ...)","symptom":"Weak binding","tasks":["Why key matters","Where key should come from","Fix direction"],"answer":"HMAC key should be secret material from secure salt/seed context."},
-    {"id":"EX29","title":"Logging path with passphrase","level":"Advanced","broken":"logger.info(passphrase)","symptom":"Secret in logs","tasks":["Risk","What may be logged","Safe policy"],"answer":"Never log secrets. Log events only, not secret values."},
-    {"id":"EX30","title":"Random from random module for security","level":"Advanced","broken":"import random; random.randint for salt","symptom":"Not cryptographically secure","tasks":["Why wrong","What to use","Where acceptable"],"answer":"Use secrets for security-sensitive randomness; random is for non-security tasks."},
-    {"id":"EX31","title":"Git force push on shared main","level":"Advanced","broken":"git push --force origin main","symptom":"History rewrite danger","tasks":["Risk to collaborators","Safer alternative","Policy"],"answer":"Avoid force push on shared main. Use PR and protected branch rules."},
-    {"id":"EX32","title":"Dependency not pinned","level":"Advanced","broken":"streamlit with no version pin","symptom":"Reproducibility and supply risk","tasks":["Why pin","requirements approach","Update strategy"],"answer":"Pin versions for reproducibility; update intentionally."},
-    {"id":"EX33","title":"Exception swallowed silently","level":"Advanced","broken":"try: ...\nexcept: pass","symptom":"Hidden failures","tasks":["Why bad","Better pattern","User messaging"],"answer":"Catch specific exceptions, log/safe message, fail visibly when needed."},
-    {"id":"EX34","title":"Path truncation splits emoji","level":"Advanced","broken":"path[:500] hard cut","symptom":"Broken unicode segment","tasks":["Why unicode cut fails","Safer approach","Validation"],"answer":"Hard byte/char cuts can split graphemes. Truncate on segment boundaries."},
-    {"id":"EX35","title":"Same pepper for all users in multi-user service","level":"Advanced","broken":"global hardcoded pepper in source","symptom":"Cross-user secret concentration","tasks":["Architecture issue","Better secret storage","Return policy"],"answer":"Do not hardcode shared pepper in source; use external secret storage and least return."},
+print(flatten_bags([[1, 2], [3]]))''',
+        "symptom_text": "Output is [1, 2] instead of [1, 2, 3]",
+        "task_list": ["Find the bug", "Explain why", "Write minimal fix"],
+        "model_answer_text": "return is inside the outer loop so the function exits after the first bag. Move return to the end of the function after both loops.",
+    },
+    {
+        "id": "EX2",
+        "title": "append vs extend on strings",
+        "level": "Intermediate",
+        "broken_code_text": '''def flatten_pool(token_list):
+    flat_list = []
+    for one_token in token_list:
+        flat_list.extend(list(one_token))
+    return flat_list
 
-    # -------- EX36-EX50 master's research-grade --------
-    {"id":"EX36","title":"Threat model: local CLI vs public web","level":"Master","broken":"same trust assumptions for Termux CLI and public Streamlit","symptom":"Missing rate limit and abuse controls on web","tasks":["Compare threat models","Controls for each","What transfers"],"answer":"CLI local user threat differs from public web. Web needs rate limits input validation and stricter secret handling."},
-    {"id":"EX37","title":"Supply-chain malicious PR review","level":"Master","broken":"merge dependency 'cleanup' PR without line audit","symptom":"Possible exfiltration commit","tasks":["What to inspect","High-risk patterns","Process control"],"answer":"Review every line for network calls secret reads and unexpected files. Protect main require review."},
-    {"id":"EX38","title":"Research critique of obfuscation claims","level":"Master","broken":"README claims emoji noise equals cryptographic strength","symptom":"Overstated security marketing","tasks":["Separate claims","Evidence standard","Rewrite claim ethically"],"answer":"Obfuscation is not crypto strength. State noise as usability/obfuscation only; ground security in CSPRNG and KDF."},
-    {"id":"EX39","title":"Fingerprintability evaluation plan","level":"Master","broken":"no methodology to test path structure leakage","symptom":"Unknown detectability","tasks":["Define metrics","Experiment design","Mitigation loop"],"answer":"Measure structural invariants across outputs, test classifier detectability, randomize non-essential patterns."},
-    {"id":"EX40","title":"Secret retention in memory/UI buffers","level":"Master","broken":"passphrase stays in multiple variables and widgets","symptom":"Extended exposure window","tasks":["Exposure points","Minimization strategy","UI guidance"],"answer":"Minimize copies, avoid logs, clear temporary buffers where practical, show once with user save responsibility."},
-    {"id":"EX41","title":"Argon2id migration design","level":"Master","broken":"PBKDF2 only with no migration notes","symptom":"Unclear upgrade path","tasks":["Benefits","Compatibility concerns","Parameter choices"],"answer":"Argon2id improves memory-hardness. Document params and keep reproducibility notes for local tooling."},
-    {"id":"EX42","title":"Reproducible research packaging","level":"Master","broken":"no pinned deps no version tag no checksum","symptom":"Weak artifact integrity","tasks":["Package requirements","Integrity controls","Release checklist"],"answer":"Pin deps, tag releases, provide checksums, document exact run steps."},
-    {"id":"EX43","title":"Adversarial README social engineering","level":"Master","broken":"README tells users to disable verification and paste seeds online","symptom":"Dangerous guidance","tasks":["Identify unsafe advice","Rewrite safe guidance","Why users fall for it"],"answer":"Never ask for seeds online. Emphasize offline test-with-small-amount and password manager storage."},
-    {"id":"EX44","title":"Cross-platform clipboard threat differences","level":"Master","broken":"assume clipboard is private everywhere","symptom":"Clipboard malware risk ignored","tasks":["Threat variance","Mitigations","UX tradeoff"],"answer":"Clipboard can be sniffed. Offer manual copy and warn on shared devices."},
-    {"id":"EX45","title":"Git history secret incident response","level":"Master","broken":"only delete file after leak","symptom":"Incomplete response","tasks":["Incident steps","Technical vs operational","Communication"],"answer":"Rotate revoke rewrite if needed, audit logs, notify affected parties, prevent with scanning and ignore rules."},
-    {"id":"EX46","title":"Formalizing least privilege in module APIs","level":"Master","broken":"crypto functions return full internal state objects","symptom":"Unnecessary secret spread","tasks":["API redesign","Return minimization","Test strategy"],"answer":"Return only required outputs. Keep internal state local. Unit test that secrets are not included in UI-facing returns."},
-    {"id":"EX47","title":"Evaluating non-determinism claims","level":"Master","broken":"claim non-deterministic but seed fixed in tests accidentally left on","symptom":"False assurance","tasks":["How to verify","Test harness design","Release gate"],"answer":"Run multiple generations assert diversity. Ensure test-only seeds cannot ship enabled."},
-    {"id":"EX48","title":"Hybrid exam: loop + security","level":"Master","broken":"flatten pools with extend(list()) then use for path noise and log chosen noise","symptom":"Broken tokens plus leakage","tasks":["Identify both bug classes","Patch both","Explain interaction"],"answer":"Use safe flatten and never log selected secret-adjacent material."},
-    {"id":"EX49","title":"Defense-in-depth map for Code N2","level":"Master","broken":"single control focus on emojis only","symptom":"Shallow defense","tasks":["List layered controls","Map to files","Residual risks"],"answer":"Layers: CSPRNG, hidden salt, KDF, optional passphrase, structural unpredictability, repo hygiene. Residual: user backup failure and endpoint malware."},
-    {"id":"EX50","title":"Research mini-proposal","level":"Master","broken":"no evaluation criteria for custom path generator security claims","symptom":"Not research-grade","tasks":["Write research question","Methods","Threat model","Metrics","Ethics"],"answer":"RQ on detectability vs usability. Methods: entropy estimates structural classifiers recovery tests. Metrics: detection AUC compatibility rate user error. Ethics: no real-fund risk, no seed collection."},
+print(flatten_pool(["AB", "CD"]))''',
+        "symptom_text": "Gets ['A','B','C','D'] instead of whole tokens",
+        "task_list": ["Why split?", "When is extend correct?", "Safe fix"],
+        "model_answer_text": "list(string) breaks a string into characters. Use append for whole strings. Use extend only when the value is already a list of items.",
+    },
+    {
+        "id": "EX3",
+        "title": "Hardcoded salt + print leak",
+        "level": "Intermediate",
+        "broken_code_text": '''import hashlib
+
+def make_system_salt(material_bytes):
+    salt_bytes = b"advanced_path_generator_v200"
+    stretched = hashlib.pbkdf2_hmac("sha3_512", material_bytes, salt_bytes, 600000)
+    print("salt=", salt_bytes)
+    return stretched.hex()''',
+        "symptom_text": "Same salt pattern every time; secret may leak in logs",
+        "task_list": ["Name two security problems", "Minimal patch", "What never to show"],
+        "model_answer_text": "Hardcoded salt and printed secret. Use secrets.token_bytes(32) and remove print. Never show internal salt or intermediate secret values.",
+    },
+    {
+        "id": "EX4",
+        "title": "DictReader without header",
+        "level": "Beginner",
+        "broken_code_text": '''# knowledge.csv has no header row
+import csv
+with open("knowledge.csv", newline="", encoding="utf-8") as csv_file:
+    rows = list(csv.DictReader(csv_file))
+print(rows[0])''',
+        "symptom_text": "Keys become first-row values; meaning becomes wrong",
+        "task_list": ["What header is required?", "What breaks?", "Correct header line"],
+        "model_answer_text": "DictReader expects a header line. Without it, the first data row becomes keys. Use: type,term,meaning,category",
+    },
+    {
+        "id": "EX5",
+        "title": "JSON progress KeyError",
+        "level": "Beginner",
+        "broken_code_text": '''import json, os
+
+def load_progress():
+    if os.path.exists("progress.json"):
+        with open("progress.json") as progress_file:
+            return json.load(progress_file)
+    return {}
+
+progress_data = load_progress()
+progress_data["wrong"].append({"term": "x"})''',
+        "symptom_text": "KeyError: 'wrong' on first run",
+        "task_list": ["Why KeyError?", "Safe default structure", "Rewrite loader"],
+        "model_answer_text": "Default {} has no 'wrong' key. Default must be {'wrong': [], 'next_review': {}}.",
+    },
+    {
+        "id": "EX6",
+        "title": "Off-by-one switch point",
+        "level": "Intermediate",
+        "broken_code_text": '''switch_point = 5
+path_parts = []
+for level_number in range(8):
+    if level_number <= switch_point:
+        path_parts.append(f"{level_number}'")
+    else:
+        path_parts.append(str(level_number))
+print(path_parts)''',
+        "symptom_text": "One extra hardened index",
+        "task_list": ["Boundary bug", "Which indexes hardened?", "Fix comparison"],
+        "model_answer_text": "<= hardens one extra index. Use level_number < switch_point.",
+    },
+    {
+        "id": "EX7",
+        "title": "Noise before digits",
+        "level": "Intermediate",
+        "broken_code_text": '''number_text = "42"
+noise_text = "🔥"
+path_piece = noise_text + number_text + "'"
+print(path_piece)''',
+        "symptom_text": "Wallet may reject or misparse path segment",
+        "task_list": ["Why dangerous?", "Correct order", "State the rule"],
+        "model_answer_text": "Digits must come first. Correct order: number, optional ', then noise.",
+    },
+    {
+        "id": "EX8",
+        "title": "Shadowed loop variable",
+        "level": "Intermediate",
+        "broken_code_text": '''emoji_groups = [["a", "b"], ["c"]]
+flat_list = []
+for emoji in emoji_groups:
+    for emoji in emoji:
+        flat_list.append(emoji)
+print(flat_list)''',
+        "symptom_text": "Works sometimes but is confusing and fragile",
+        "task_list": ["What is shadowing?", "Rename cleanly", "Maintainability risk"],
+        "model_answer_text": "Inner emoji overwrites outer emoji. Use names like one_group and one_emoji.",
+    },
+    {
+        "id": "EX9",
+        "title": "Missing try-except on int(input)",
+        "level": "Beginner",
+        "broken_code_text": '''how_many = int(input("How many questions? "))
+print("Got", how_many)''',
+        "symptom_text": "Typing text crashes with ValueError",
+        "task_list": ["What exception?", "Wrap safely", "Choose default"],
+        "model_answer_text": "ValueError. Use try/except and fallback default such as 10.",
+    },
+    {
+        "id": "EX10",
+        "title": "Direct experimental commits on main",
+        "level": "Process",
+        "broken_code_text": '''# process anti-pattern
+# 1. edit on main
+# 2. commit experimental break
+# 3. push immediately''',
+        "symptom_text": "Stable branch becomes unusable",
+        "task_list": ["Why dangerous?", "Safer branch flow", "When update main?"],
+        "model_answer_text": "Use a feature branch, test, then merge. Main should stay stable.",
+    },
+    {
+        "id": "EX11",
+        "title": "Secret committed then deleted",
+        "level": "Security",
+        "broken_code_text": '''# Day 1: commit .env with real key
+# Day 2: delete .env and commit deletion
+# Assume secret is gone forever''',
+        "symptom_text": "Secret still recoverable from git history",
+        "task_list": ["Why deletion is not enough", "What to do to the secret", "Prevention"],
+        "model_answer_text": "History still contains the secret. Rotate/revoke it. Add .env to .gitignore and use environment variables.",
+    },
+    {
+        "id": "EX12",
+        "title": "Create .gitignore with cat heredoc",
+        "level": "Linux",
+        "broken_code_text": '''echo .env > .gitignore
+# incomplete ignore list''',
+        "symptom_text": "Only one ignore rule",
+        "task_list": ["Write heredoc command", "Include key entries", "Why heredoc helps"],
+        "model_answer_text": "cat > .gitignore << 'EOF' then .env __pycache__/ venv/ then EOF. Heredoc writes multi-line files cleanly.",
+    },
+    {
+        "id": "EX13",
+        "title": "diff then patch workflow",
+        "level": "Linux",
+        "broken_code_text": '''# edited in place with no patch trail''',
+        "symptom_text": "No auditable repair history",
+        "task_list": ["Create patch command", "Inspect patch", "Apply patch"],
+        "model_answer_text": "diff -u old.py new.py > fix.patch; cat fix.patch; patch < fix.patch",
+    },
+    {
+        "id": "EX14",
+        "title": "Heredoc piped to patch",
+        "level": "Linux",
+        "broken_code_text": '''# need emergency fix with no patch file on disk''',
+        "symptom_text": "Unknown inline patch pattern",
+        "task_list": ["Write pattern", "One risk", "One benefit"],
+        "model_answer_text": "cat << 'PATCH' | patch ... PATCH. Benefit: fast. Risk: applying without review can damage files.",
+    },
+    {
+        "id": "EX15",
+        "title": "Combined cat/diff/patch recovery",
+        "level": "Linux",
+        "broken_code_text": '''# config.py broken; config.py.bak exists''',
+        "symptom_text": "Ad-hoc edits with no recoverable trail",
+        "task_list": ["Ordered recovery steps", "Why order matters"],
+        "model_answer_text": "Keep backup, edit copy, diff -u backup edited > fix.patch, review with cat, apply with patch. Order preserves rollback.",
+    },
+    {
+        "id": "EX16",
+        "title": "Deep nested counting early return",
+        "level": "Intermediate",
+        "broken_code_text": '''def count_people(country_data):
+    total_people = 0
+    for one_state in country_data:
+        for one_lga in one_state:
+            for one_person in one_lga:
+                total_people += 1
+            return total_people''',
+        "symptom_text": "Counts only first LGA group",
+        "task_list": ["Find wrong return level", "Fix function", "Link to flatten lesson"],
+        "model_answer_text": "return is too deep. Finish all loops, then return once.",
+    },
+    {
+        "id": "EX17",
+        "title": "Nested stall random.choice",
+        "level": "Intermediate",
+        "broken_code_text": '''import random
+emoji_stall = [["🔥", "🚀"], ["🐍"]]
+print(random.choice(emoji_stall))''',
+        "symptom_text": "Sometimes returns a whole group list",
+        "task_list": ["Why?", "Flatten then choose", "Generator link"],
+        "model_answer_text": "choice picks one top-level element. Flatten first, then choose from the flat list.",
+    },
+    {
+        "id": "EX18",
+        "title": "Thin UI violated",
+        "level": "Design",
+        "broken_code_text": '''# main.py owns crypto and path building
+import hashlib, secrets
+def main():
+    salt_bytes = secrets.token_bytes(32)
+    material = hashlib.pbkdf2_hmac("sha3_512", b"x", salt_bytes, 600000)
+    print("m/" + material.hex())''',
+        "symptom_text": "Hard to test/audit/reuse",
+        "task_list": ["Principle violated", "File split", "Role of main"],
+        "model_answer_text": "Separation of Concerns. Move crypto to crypto.py and path building to generator.py. main only coordinates input/output.",
+    },
+    {
+        "id": "EX19",
+        "title": "Fixed switch point fingerprint",
+        "level": "Security",
+        "broken_code_text": '''for level_number in range(levels):
+    if level_number < 200:
+        piece = f"{index_text}'"
+    else:
+        piece = index_text''',
+        "symptom_text": "Every output shares same hardening pattern",
+        "task_list": ["Why fingerprint?", "Random switch approach", "Attacker advantage"],
+        "model_answer_text": "Fixed rule is detectable. Use a random switch_point in a range so structure is less predictable.",
+    },
+    {
+        "id": "EX20",
+        "title": "Loose answer checker",
+        "level": "Logic",
+        "broken_code_text": '''def answer_looks_correct(student_answer, expected_answer):
+    student_text = student_answer.lower().strip()
+    expected_text = expected_answer.lower()
+    return student_text in expected_text or expected_text in student_text''',
+        "symptom_text": "Very short weak answers can pass",
+        "task_list": ["False-positive example", "Min-length guard", "Extra tightening rule"],
+        "model_answer_text": "Require length >= 3 and stronger word overlap checks to reduce false positives.",
+    },
+    {
+        "id": "EX21",
+        "title": "PBKDF2 iterations too low",
+        "level": "Advanced",
+        "broken_code_text": '''hashlib.pbkdf2_hmac("sha3_512", material_bytes, salt_bytes, 1000)''',
+        "symptom_text": "Too fast to brute force",
+        "task_list": ["Why weak?", "Stronger setting idea", "Tradeoff"],
+        "model_answer_text": "Low iterations are cheap for attackers. Use a much higher iteration count; slower but safer.",
+    },
+    {
+        "id": "EX22",
+        "title": "Returning internal salt to UI",
+        "level": "Advanced",
+        "broken_code_text": '''return salt_bytes, stretched_bytes  # then print both in UI''',
+        "symptom_text": "Secret surface expanded",
+        "task_list": ["Why bad?", "What to return?", "Least privilege"],
+        "model_answer_text": "Return only what the next step needs. Never expose internal salt to UI or logs.",
+    },
+    {
+        "id": "EX23",
+        "title": "Predictable forced path ending",
+        "level": "Advanced",
+        "broken_code_text": '''# always force the same long artificial ending on every path''',
+        "symptom_text": "Structural fingerprint",
+        "task_list": ["Identify leak", "What can stay fixed", "What should vary"],
+        "model_answer_text": "Keep only necessary compatibility endings. Avoid extra fixed patterns that make every output look the same.",
+    },
+    {
+        "id": "EX24",
+        "title": "Missing environment variable handling",
+        "level": "Advanced",
+        "broken_code_text": '''pepper = os.environ["APP_PEPPER"]''',
+        "symptom_text": "KeyError crash when unset",
+        "task_list": ["Safer read", "Fail closed?", "Clear message"],
+        "model_answer_text": "Use os.environ.get and raise a clear config error if a required secret is missing.",
+    },
+    {
+        "id": "EX25",
+        "title": ".env committed to git",
+        "level": "Advanced",
+        "broken_code_text": '''git add .env && git commit -m "config"''',
+        "symptom_text": "Secret exposure risk",
+        "task_list": ["Immediate actions", "Repo controls", "Prevention"],
+        "model_answer_text": "Rotate secrets, stop tracking .env, add .gitignore, protect main branch.",
+    },
+    {
+        "id": "EX26",
+        "title": "No feature branch workflow",
+        "level": "Advanced",
+        "broken_code_text": '''# all experiments committed on main''',
+        "symptom_text": "No safe experimentation lane",
+        "task_list": ["Describe safer flow", "PR value", "Main protection"],
+        "model_answer_text": "Develop on feature branch, review, then merge. Keep main protected and stable.",
+    },
+    {
+        "id": "EX27",
+        "title": "Termux clipboard hard dependency",
+        "level": "Advanced",
+        "broken_code_text": '''subprocess.run(["termux-clipboard-set", result], check=True)''',
+        "symptom_text": "Fails on desktop Linux",
+        "task_list": ["Portability issue", "Fallback design", "Detection idea"],
+        "model_answer_text": "Wrap clipboard call in try/except and fall back to manual copy on non-Termux systems.",
+    },
+    {
+        "id": "EX28",
+        "title": "HMAC with public key material",
+        "level": "Advanced",
+        "broken_code_text": '''hmac.new(b"public", message_bytes, hashlib.sha3_512)''',
+        "symptom_text": "Weak binding to secret state",
+        "task_list": ["Why key matters", "Where key should come from", "Fix direction"],
+        "model_answer_text": "HMAC key should come from secret internal material, not a public constant.",
+    },
+    {
+        "id": "EX29",
+        "title": "Logging passphrase",
+        "level": "Advanced",
+        "broken_code_text": '''logger.info("passphrase=%s", passphrase_text)''',
+        "symptom_text": "Secret lands in logs",
+        "task_list": ["Risk", "What may be logged", "Safe policy"],
+        "model_answer_text": "Never log secrets. Log events only, not secret values.",
+    },
+    {
+        "id": "EX30",
+        "title": "Using random for security salt",
+        "level": "Advanced",
+        "broken_code_text": '''import random
+salt_number = random.randint(0, 10**18)''',
+        "symptom_text": "Not cryptographically secure",
+        "task_list": ["Why wrong?", "What to use?", "Where random is okay"],
+        "model_answer_text": "Use secrets for security-sensitive randomness. random is only for non-security tasks.",
+    },
+    {
+        "id": "EX31",
+        "title": "Force push on shared main",
+        "level": "Advanced",
+        "broken_code_text": '''git push --force origin main''',
+        "symptom_text": "Shared history can be destroyed",
+        "task_list": ["Risk to collaborators", "Safer alternative", "Policy"],
+        "model_answer_text": "Avoid force push on shared main. Use pull requests and branch protection.",
+    },
+    {
+        "id": "EX32",
+        "title": "Unpinned dependencies",
+        "level": "Advanced",
+        "broken_code_text": '''# requirements.txt
+streamlit
+argon2-cffi''',
+        "symptom_text": "Reproducibility and supply risk",
+        "task_list": ["Why pin?", "How to pin", "Update strategy"],
+        "model_answer_text": "Pin versions for reproducibility and update intentionally after testing.",
+    },
+    {
+        "id": "EX33",
+        "title": "Bare except pass",
+        "level": "Advanced",
+        "broken_code_text": '''try:
+    risky_work()
+except:
+    pass''',
+        "symptom_text": "Failures become invisible",
+        "task_list": ["Why bad?", "Better pattern", "User messaging"],
+        "model_answer_text": "Catch specific exceptions, show or log a clear message, and fail visibly when needed.",
+    },
+    {
+        "id": "EX34",
+        "title": "Hard truncation splits emoji",
+        "level": "Advanced",
+        "broken_code_text": '''path_text = path_text[:500]''',
+        "symptom_text": "Unicode segment can break",
+        "task_list": ["Why hard cut fails", "Safer approach", "Validation idea"],
+        "model_answer_text": "Hard cuts can split multi-codepoint characters. Truncate on path segment boundaries instead.",
+    },
+    {
+        "id": "EX35",
+        "title": "Hardcoded shared pepper for all users",
+        "level": "Advanced",
+        "broken_code_text": '''PEPPER = b"one_global_pepper_for_everyone"''',
+        "symptom_text": "Cross-user secret concentration",
+        "task_list": ["Architecture issue", "Better storage", "Return policy"],
+        "model_answer_text": "Do not hardcode shared pepper in source. Use external secret storage and return only needed values.",
+    },
+    {
+        "id": "EX36",
+        "title": "CLI threat model used for public web",
+        "level": "Master",
+        "broken_code_text": '''# same trust assumptions for local Termux CLI and public Streamlit app''',
+        "symptom_text": "Missing web abuse controls",
+        "task_list": ["Compare threat models", "Controls for each", "What transfers"],
+        "model_answer_text": "Local CLI and public web have different threats. Web needs rate limiting, stronger input validation, and stricter secret handling.",
+    },
+    {
+        "id": "EX37",
+        "title": "Malicious PR merged without audit",
+        "level": "Master",
+        "broken_code_text": '''# merge "cleanup" PR without reading every changed line''',
+        "symptom_text": "Possible secret exfiltration",
+        "task_list": ["What to inspect", "High-risk patterns", "Process control"],
+        "model_answer_text": "Review every line for network calls, secret reads, and unexpected files. Protect main and require review.",
+    },
+    {
+        "id": "EX38",
+        "title": "Overstated obfuscation claims",
+        "level": "Master",
+        "broken_code_text": '''# README: emoji noise = cryptographic strength''',
+        "symptom_text": "Misleading security claim",
+        "task_list": ["Separate claims", "Evidence standard", "Ethical rewrite"],
+        "model_answer_text": "Obfuscation is not cryptographic strength. Say noise is obfuscation only; real strength is CSPRNG, KDF, and secrets.",
+    },
+    {
+        "id": "EX39",
+        "title": "No fingerprintability test plan",
+        "level": "Master",
+        "broken_code_text": '''# no method to test whether outputs are easy to detect''',
+        "symptom_text": "Unknown detectability",
+        "task_list": ["Define metrics", "Experiment design", "Mitigation loop"],
+        "model_answer_text": "Measure structural invariants across outputs, test detectability, then randomize non-essential patterns.",
+    },
+    {
+        "id": "EX40",
+        "title": "Passphrase retained in many places",
+        "level": "Master",
+        "broken_code_text": '''# passphrase copied into many variables and UI widgets''',
+        "symptom_text": "Longer exposure window",
+        "task_list": ["Exposure points", "Minimization strategy", "UI guidance"],
+        "model_answer_text": "Minimize copies, avoid logs, show once, and make the user responsible for safe storage.",
+    },
+    {
+        "id": "EX41",
+        "title": "Argon2id migration design",
+        "level": "Master",
+        "broken_code_text": '''# PBKDF2 only, no upgrade notes''',
+        "symptom_text": "Unclear hardening path",
+        "task_list": ["Benefits", "Compatibility concerns", "Parameter notes"],
+        "model_answer_text": "Argon2id is memory-hard and stronger against GPU attacks. Document parameters and reproducibility notes.",
+    },
+    {
+        "id": "EX42",
+        "title": "Weak research packaging",
+        "level": "Master",
+        "broken_code_text": '''# no pinned deps, no version tag, no checksum''',
+        "symptom_text": "Weak artifact integrity",
+        "task_list": ["Package requirements", "Integrity controls", "Release checklist"],
+        "model_answer_text": "Pin dependencies, tag releases, provide checksums, and document exact run steps.",
+    },
+    {
+        "id": "EX43",
+        "title": "Dangerous README guidance",
+        "level": "Master",
+        "broken_code_text": '''# README tells users to paste seed phrases into online forms''',
+        "symptom_text": "Social-engineering risk",
+        "task_list": ["Unsafe advice", "Safe rewrite", "Why users fall for it"],
+        "model_answer_text": "Never ask for seeds online. Emphasize offline use, small test amounts, and password-manager storage.",
+    },
+    {
+        "id": "EX44",
+        "title": "Clipboard privacy assumption",
+        "level": "Master",
+        "broken_code_text": '''# assume clipboard is always private''',
+        "symptom_text": "Clipboard malware ignored",
+        "task_list": ["Threat variance", "Mitigations", "UX tradeoff"],
+        "model_answer_text": "Clipboard can be sniffed. Offer manual copy and warn on shared devices.",
+    },
+    {
+        "id": "EX45",
+        "title": "Incomplete secret incident response",
+        "level": "Master",
+        "broken_code_text": '''# only delete leaked file from repo''',
+        "symptom_text": "Incomplete response",
+        "task_list": ["Incident steps", "Technical vs operational", "Communication"],
+        "model_answer_text": "Rotate and revoke secrets, audit history/logs, notify if needed, and prevent repeat with ignore rules and scanning.",
+    },
+    {
+        "id": "EX46",
+        "title": "API returns full internal state",
+        "level": "Master",
+        "broken_code_text": '''return {"salt": salt_bytes, "stretched": stretched_bytes, "debug": everything}''',
+        "symptom_text": "Unnecessary secret spread",
+        "task_list": ["API redesign", "Return minimization", "Test strategy"],
+        "model_answer_text": "Return only required outputs. Keep internal state private. Test that UI-facing returns contain no secrets.",
+    },
+    {
+        "id": "EX47",
+        "title": "False non-determinism claim",
+        "level": "Master",
+        "broken_code_text": '''# test seed left enabled in release build''',
+        "symptom_text": "Outputs become predictable in release",
+        "task_list": ["How to verify", "Test harness", "Release gate"],
+        "model_answer_text": "Run many generations and assert diversity. Ensure test-only seeds cannot ship enabled.",
+    },
+    {
+        "id": "EX48",
+        "title": "Hybrid loop + security bug",
+        "level": "Master",
+        "broken_code_text": '''flat_list.extend(list(one_token))
+print("selected noise:", chosen_noise)''',
+        "symptom_text": "Broken tokens plus leakage",
+        "task_list": ["Identify both bug classes", "Patch both", "Explain interaction"],
+        "model_answer_text": "Use safe flatten that keeps whole tokens, and never log secret-adjacent selected material.",
+    },
+    {
+        "id": "EX49",
+        "title": "Defense-in-depth map for Code N2",
+        "level": "Master",
+        "broken_code_text": '''# only focus on emojis as protection''',
+        "symptom_text": "Shallow defense",
+        "task_list": ["List layered controls", "Map to files", "Residual risks"],
+        "model_answer_text": "Layers: CSPRNG, hidden salt, KDF, optional passphrase, structural unpredictability, repo hygiene. Residual risks include user backup failure and endpoint malware.",
+    },
+    {
+        "id": "EX50",
+        "title": "Research mini-proposal for path generator claims",
+        "level": "Master",
+        "broken_code_text": '''# no evaluation criteria for security claims''',
+        "symptom_text": "Not research-grade",
+        "task_list": ["Research question", "Methods", "Threat model", "Metrics", "Ethics"],
+        "model_answer_text": "Ask how detectable and usable custom paths are. Use structural tests, compatibility tests, and recovery-error tests. Never collect real seeds or encourage real-fund risk.",
+    },
 ]
 
 
-def show_stats(progress):
-    completed = progress.get("completed", [])
-    scores = progress.get("scores", {})
-    print(f"Completed: {len(completed)}/50")
-    if scores:
-        avg = sum(scores.values()) / len(scores)
-        print(f"Average best score: {int(avg * 100)}%")
+def show_progress_stats(progress_data):
+    completed_ids = progress_data.get("completed", [])
+    score_map = progress_data.get("scores", {})
+    print(f"Completed: {len(completed_ids)}/50")
+    if score_map:
+        average_score = sum(score_map.values()) / len(score_map)
+        print(f"Average best score: {int(average_score * 100)}%")
     else:
         print("No scores yet.")
 
 
-def run_exercises():
+def run_exercises_menu():
     while True:
-        clear()
-        progress = load_progress()
+        clear_screen()
+        progress_data = load_exercise_progress()
         print("=== Exercises-only mode (EX1-EX50) ===")
-        show_stats(progress)
+        show_progress_stats(progress_data)
         print("\n1. List all exercises")
         print("2. Practice one by ID")
         print("3. Random exercise")
         print("4. Random Master-level only")
         print("0. Back")
-        choice = input("\nChoose: ").strip()
+        menu_choice = input("\nChoose: ").strip()
 
-        if choice == "0":
+        if menu_choice == "0":
             return
-        if choice == "1":
-            clear()
-            for ex in EXERCISES:
-                mark = "✓" if ex["id"] in progress.get("completed", []) else " "
-                print(f"[{mark}] {ex['id']} [{ex['level']}] {ex['title']}")
+        if menu_choice == "1":
+            clear_screen()
+            for one_exercise in EXERCISES:
+                done_mark = "Y" if one_exercise["id"] in progress_data.get("completed", []) else " "
+                print(f"[{done_mark}] {one_exercise['id']} [{one_exercise['level']}] {one_exercise['title']}")
             input("\nPress Enter...")
-        elif choice == "2":
-            ex_id = input("ID (EX1..EX50): ").strip().upper()
-            ex = next((e for e in EXERCISES if e["id"] == ex_id), None)
-            if not ex:
+        elif menu_choice == "2":
+            exercise_id = input("ID (EX1..EX50): ").strip().upper()
+            selected = next((ex for ex in EXERCISES if ex["id"] == exercise_id), None)
+            if not selected:
                 print("Not found")
                 input("Press Enter...")
             else:
-                practice_one(ex)
-        elif choice == "3":
-            practice_one(random.choice(EXERCISES))
-        elif choice == "4":
-            masters = [e for e in EXERCISES if e["level"] == "Master"]
-            practice_one(random.choice(masters))
+                practice_one_exercise(selected)
+        elif menu_choice == "3":
+            practice_one_exercise(random.choice(EXERCISES))
+        elif menu_choice == "4":
+            master_list = [ex for ex in EXERCISES if ex["level"] == "Master"]
+            practice_one_exercise(random.choice(master_list))
         else:
             print("Invalid choice")
             input("Press Enter...")
 
 
 if __name__ == "__main__":
-    run_exercises()
+    run_exercises_menu()
