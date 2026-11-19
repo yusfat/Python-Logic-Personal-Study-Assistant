@@ -454,3 +454,48 @@ exercise,EX47 false non-determinism claim,verify output diversity and block test
 exercise,EX48 hybrid loop and security bug,fix unsafe flatten and remove secret-adjacent logging together,Master Lab
 exercise,EX49 defense in depth map for Code N2,combine CSPRNG hidden salt KDF passphrase structure controls and repo hygiene,Master Lab
 exercise,EX50 research mini proposal,define question methods threat model metrics and ethics without real-seed collection,Master Lab
+
+question,What does the _REAL_SOCKET variable protect in main.py?,It keeps a reference to the original socket.socket so the continuous network guard can still create sockets after the monkey-patch has replaced the public name,Network Isolation
+question,Why does has_network() shuffle the probe targets?,To make it harder for an attacker to selectively block only the fixed list of IPs the tool checks,Network Isolation
+question,What happens if network appears while the program is running?,The background network_guard thread detects it, clears the screen, and calls os._exit(1),Network Isolation
+question,Which modules are monkey-patched to block network activity?,socket.socket, socket.create_connection, socket.socketpair, ssl.SSLContext, urllib.request.urlopen, http.client.HTTPConnection and HTTPSConnection,Network Isolation
+question,What is the purpose of sys.addaudithook in the hardened version?,It intercepts socket.connect (and related events) at the audit level as a second layer of blocking,Network Isolation
+question,Why is the network check performed before any secret generation?,So that no high-entropy material is ever created while the machine is online,Security Design
+question,What does paranoid mode change in the current design?,It disables clipboard copying and makes the recorder/debugger checks stricter (strict=True),Paranoid Mode
+question,Why is the clipboard cleared after 45 seconds?,To reduce the window during which a generated secret remains available to other processes or shoulder-surfing,Operational Security
+question,Why is the terminal also cleared after 45 seconds?,To remove the secret from scrollback and visible history after the user has had time to save it,Operational Security
+question,What is the biggest limitation of secure_cleanup()?,Pure Python strings are immutable and can exist in multiple places; ctypes wiping is best-effort only and not cryptographically reliable,Memory Security
+question,Why does load_secret_noise require a matching .hmac file?,To ensure the decrypted content has not been tampered with and that the correct password was used,Secret Loading
+question,What happens if a user supplies a non-expected filename without a valid HMAC?,The current hardened version refuses to load it (the old weak path was closed),Secret Loading
+question,Why is the expected secret-noise filename obfuscated with XOR and a short hash?,Mild security-through-obscurity so casual inspection does not immediately reveal the canonical name,Obfuscation
+question,What is the role of make_session_pools()?,It creates a freshly shuffled set of character pools for each generation so the selection order is non-deterministic,Non-Determinism
+question,Why are system salts never printed?,Because they are internal high-entropy material used to stretch and unique-ify every generation; showing them would weaken the design,Security Design
+question,What is the main reason the tool refuses to run when a debugger is detected?,To make live analysis and memory dumping of generated secrets harder,Anti-Analysis
+question,How does the improved is_terminal_recorder_present reduce false positives?,It separates high-confidence recorder names from low-confidence ones and only hard-blocks on high-confidence findings in strict mode,Hardening Decision
+question,Why keep the psutil path instead of removing it?,Because when available it gives better process visibility; a pure-/proc fallback is provided when it is missing,Design Decision
+question,What is Kerckhoffs's principle in one sentence?,A cryptosystem should remain secure even if everything about the system except the key is public knowledge,Security Principle
+question,Why can the full decoy email never appear in a generated path or password?,Because smart_flatten turns every string into individual characters before selection,Code Understanding
+question,What is the correct place for intentional decoy material?,A file that is never imported by the generator (for example .env.example),Security Hygiene
+question,Why is length more important than pool secrecy in this design?,Because entropy scales with length × log2(pool size); a large public pool + sufficient length is already extremely expensive to brute-force,Cryptographic Reasoning
+question,What is the biggest practical risk for the end user of this tool?,Self-lockout caused by loss or normalization of invisible/Unicode characters when saving or transferring the secret,Usability Risk
+decision,Why was the silent no-HMAC loading path removed?,Because it allowed unverified and potentially tampered files to be accepted,Hardening Decision
+decision,Why use a continuous background network guard instead of a single check?,A single check can be raced; continuous monitoring reduces the window for turning network on after start,Network Isolation
+decision,Why clear both clipboard and terminal after a fixed delay?,To give the user time to save the secret while still limiting the exposure window,Operational Security
+challenge,Main engineering tension in the recorder detection,Balancing strong protection against real screen-capture tools with low false-positive rate for normal users,Engineering Trade-off
+challenge,Why is perfect memory wiping impossible in this project?,Because CPython string objects are immutable and the interpreter may keep multiple copies or interned versions,Language Limitation
+concept,Kerckhoffs's Principle,A cryptosystem should remain secure even if everything about the system except the key is public knowledge,Security Principle
+concept,Security through Obscurity,Relying on hiding the design or source code for protection - considered weak,Security Principle
+decision,Why keep real secret pools encrypted and separate,So the generator can still be strong even if the public pools are fully known,Security Decision
+decision,Why create a never-imported decoy file,So grep finds interesting strings but those strings can never enter generated output,Security Decision
+decision,Why prefer .env.example for decoys,It is a conventional place attackers look and it is never loaded by the application,Security Decision
+concept,Character-level Flattening,Turning long strings into individual characters so whole honeypot phrases cannot appear in output,Security Technique
+concept,Best-effort Memory Wiping,Attempting to overwrite secrets in memory knowing that pure Python cannot guarantee complete erasure,Security Limitation
+concept,Strict Mode Trade-off,Blocking generation when a recorder is detected increases safety but can cause false positives,Security Design
+decision,Why improve recorder detection instead of removing it,To keep the protection while reducing cases where normal users are blocked,Security Decision
+concept,Network Isolation Goal,Make remote network attacks largely out of scope by refusing to run when online and blocking socket use,Security Goal
+decision,Why require HMAC for secret noise files,To prevent loading of tampered or unverified encrypted pools,Security Decision
+concept,Self-lockout Risk,When a generated secret contains invisible or complex Unicode characters that later get lost or normalized,Usability Risk
+decision,Why recommend this tool for high-value rarely-typed secrets,Because the same properties that frustrate attackers also make daily typing and some password managers unreliable,Usage Guidance
+question,What is the main protection according to Kerckhoffs's principle?,The secrecy of the key or final generated secret - not the secrecy of the algorithm or pools,Security
+question,Why can the full decoy email never appear in a generated password?,Because the pool is flattened to individual characters before selection,Code Understanding
+challenge,Main tension in Unicode-heavy generators,Higher entropy and tool-breaking power versus higher risk of self-lockout and compatibility problems,Challenge
