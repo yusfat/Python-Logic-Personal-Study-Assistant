@@ -1,3 +1,5 @@
+
+
 type,term,meaning,category
 decision,Why use csv.DictReader instead of csv.reader?,Because DictReader automatically turns each row into a dictionary using the header names as keys,Code Decision
 decision,Why store each term as a dictionary?,So that one item can hold multiple related pieces of information (type term meaning category),Code Decision
@@ -499,3 +501,148 @@ decision,Why recommend this tool for high-value rarely-typed secrets,Because the
 question,What is the main protection according to Kerckhoffs's principle?,The secrecy of the key or final generated secret - not the secrecy of the algorithm or pools,Security
 question,Why can the full decoy email never appear in a generated password?,Because the pool is flattened to individual characters before selection,Code Understanding
 challenge,Main tension in Unicode-heavy generators,Higher entropy and tool-breaking power versus higher risk of self-lockout and compatibility problems,Challenge
+
+#😭
+
+type,term,meaning,category
+question,What does hashlib.sha256() return?,A hash object. You must call .hexdigest() or .digest() to get the actual hash value,Technical - Simple
+question,Why use hashlib.sha256() and not md5()?,MD5 is broken and collisions are easy. SHA256 is still safe for integrity checks,Technical - Simple
+question,What does .encode('utf-8') do?,Turns a Python string into bytes so hashlib can hash it. Hashlib cannot hash str directly,Technical - Simple
+question,What is the difference between .digest() and .hexdigest()?,digest() returns raw bytes. hexdigest() returns readable hex string like a1b2c3,Technical - Medium
+question,Why read files in 'rb' mode for hashing?,Binary mode avoids Python changing line endings. Text mode would change hash on Windows vs Linux,Technical - Medium
+question,What does sorted() do to file list?,Puts files in same A-Z order every time so hash order is always identical,Technical - Simple
+question,What happens if you forget to sort before hashing?,Hash changes randomly even if files did not change. Test becomes flaky,Technical - Medium
+question,Why normalize \r\n to \n before hashing?,Windows uses \r\n Linux uses \n. Without normalizing same file gives different hash on different OS,Technical - Intermediate
+question,What is a salt in hashing?,Random bytes added before hashing so same password gives different hash every time,Technical - Simple
+question,Why use secrets.token_bytes(32) instead of random?,secrets is for security and uses OS randomness. random is predictable and for games not secrets,Technical - Medium
+question,What does secrets.choice() do?,Picks one item securely from a list. Use it for picking emoji letters numbers for passphrase,Technical - Simple
+question,Why never use random.random() for passphrase?,Because random can be predicted if attacker knows seed. secrets cannot,Technical - Intermediate
+question,What is PBKDF2?,Password-Based Key Derivation Function 2. It hashes many times to slow down brute force,Technical - Intermediate
+question,What does iterations=100000 mean in PBKDF2?,Hash the password 100000 times. More iterations = slower for attacker and for you,Cryptography - Intermediate
+question,PBKDF2 vs Argon2id which is stronger?,Argon2id is memory-hard so GPU attacks are harder. PBKDF2 is older but widely supported,Cryptography - Hard
+question,What does socket.socket() actually create?,An endpoint for network communication. Blocking it stops program from opening network connections,Technical - Simple
+question,What is the difference between socket.socket and socket.connect?,socket() creates the socket. connect() tries to connect it to a server. You must block both to be safe,Technical - Intermediate
+question,What does sys.addaudithook do?,Adds a function that Python calls for every audited event like socket.connect open and subprocess,Technical - Hard
+question,Why does audit hook need to raise exception to block?,If it just returns Python allows the event. Raising PermissionError stops it,Technical - Hard
+question,What is monkey-patching?,Replacing a function at runtime like socket.socket = blocked_socket. It changes behavior without editing library code,Technical - Intermediate
+question,Why save _REAL_SOCKET before monkey-patching?,Because after patching you lose access to real socket. Guard needs real one to test if blocking works,Technical - Intermediate
+question,What does try-except do in Python?,Try risky code. If it fails except runs instead of crashing program,Technical - Simple
+question,Why use try-except when asking for number of questions?,To prevent crash if user types text instead of number,Error Handling - Simple
+question,What does finally do?,Code in finally always runs even if try fails or returns. Good for cleanup,Technical - Medium
+question,What is the difference between == and is?,== checks value equal. is checks same object in memory,Technical - Medium
+question,What does if __name__ == '__main__' do?,Runs code only when file is run directly not when imported,Technical - Medium
+question,Why does importing integrity.py run code?,Because top-level code runs on import. Put code inside functions or __main__ guard to stop it,Technical - Intermediate
+question,What is .gitignore?,File that tells Git which files to never track like .env and __pycache__,Git - Simple
+question,What does git status show?,Which files changed staged or untracked. Always check before commit,Git - Simple
+question,What does git diff show?,Line-by-line changes you have not committed yet,Git - Simple
+question,What does git log --oneline show?,Short history: commit hash + message like 740dd34 fix message,Git - Simple
+question,What does git checkout -b backup do?,Creates new branch called backup and switches to it,Git - Medium
+question,What does git reset --hard HEAD~1 do?,Deletes last commit and all its changes. Dangerous use only if you understand it,Git - Hard
+question,Why is git push --force dangerous?,It overwrites GitHub history. If someone else pulled old history they will get conflicts,Git - Hard
+question,What is a merge conflict?,Two branches changed same line. Git cannot decide which to keep so you must choose,Git - Medium
+question,What does open(file 'r' encoding='utf-8') do?,Opens text file with utf-8 so emoji and foreign letters like 派 向 do not crash,Technical - Medium
+question,Why does flatten_pool break flags?,Because flag like flag CD is 2 chars len 2. Python splits into half flags if you use extend,Technical - Intermediate
+question,What does .extend() vs .append() do?,extend() pours contents in. append() keeps whole item as one. Use append for flags and spaces,Technical - Simple
+question,What does isinstance(item list) check do?,Checks if item is a list. If yes extend it else append it. This is smart flatten,Technical - Intermediate
+question,What does list comprehension do?,One-line loop like [x for bag in big_bag for x in bag]. Faster and pythonic,Technical - Medium
+question,What does return inside loop do wrong?,Return stops after first bag only. Return outside waits until all bags poured,Technical - Intermediate
+code,Hash a string correctly,"hashlib.sha256('hello'.encode('utf-8')).hexdigest()",Code Pattern - Simple
+code,Hash a file in binary,"hashlib.sha256(open('a.py' 'rb').read()).hexdigest()",Code Pattern - Simple
+code,Canonical file hash,"data = open(f 'rb').read().replace(b'\r\n' b'\n'); h.update(data)",Code Pattern - Intermediate
+code,Sort then hash,"for f in sorted(files): h.update(open(f 'rb').read())",Code Pattern - Simple
+code,Secure random pick,"secrets.choice(['A' 'B' 'C' '🌘' '派'])",Code Pattern - Simple
+code,Secure random bytes,"secrets.token_bytes(32)",Code Pattern - Simple
+code,Block socket,"socket.socket = lambda *a **k: (_ for _ in ()).throw(PermissionError('Network disabled'))",Code Pattern - Intermediate
+code,Audit hook block,"sys.addaudithook(lambda e a: (_ for _ in ()).throw(PermissionError('blocked')) if e == 'socket.connect' else None)",Code Pattern - Hard
+code,Smart flatten,"[x for bag in big_bag for x in bag] if all isinstance(b list) for b in big_bag else big_bag",Code Pattern - Intermediate
+code,Smart flatten with flag fix,"[item for bag in big_bag for item in (bag if isinstance(bag list) else [bag])]",Code Pattern - Hard
+code,Try-except for input,"try: n = int(input('How many? ')) except ValueError: print('Type a number')",Code Pattern - Simple
+code,Read CSV with DictReader,"with open('terms.csv') as f: rows = list(csv.DictReader(f))",Code Pattern - Simple
+exercise,STREAK 1 - Hash This,In Python hash the string CustomPath with sha256 and print hexdigest,Exercise - Simple
+exercise,STREAK 2 - Fix The Bug,This code fails: hashlib.sha256('hello').hexdigest(). Fix it in one line,Exercise - Simple
+exercise,STREAK 3 - Sort Attack,Files = ['z.py' 'a.py' 'm.py']. Write code to hash them in sorted order,Exercise - Simple
+exercise,STREAK 4 - Windows Bug,File hashes differently on Windows vs Linux. What one line fixes line endings?,Exercise - Medium
+exercise,STREAK 5 - Secrets vs Random,Rewrite random.choice(pool) to use secrets module. Why is yours safer?,Exercise - Medium
+exercise,STREAK 6 - Build Blocker,Write blocked_socket() that raises PermissionError('Network disabled') for any args,Exercise - Intermediate
+exercise,STREAK 7 - Save Real Socket,Write 2 lines: save real socket then replace socket.socket with blocker,Exercise - Intermediate
+exercise,STREAK 8 - Audit Hook,Write audit hook that blocks only socket.connect but allows open,Exercise - Hard
+exercise,BOSS 1 - Canonical Hash Function,Write collect_hashes(folder) that returns dict {filename: sha256} with sorted files normalized endings and skips baseline.json,Exercise - Hard
+exercise,BOSS 2 - Tamper Detector,Write verify(baseline) that returns True if all files match and False if one missing or changed,Exercise - Hard
+exercise,BOSS 3 - Secure Generator,Write gen_level() that picks 1 number + 2 emoji + 1 foreign letter using secrets.choice only,Exercise - Intermediate
+exercise,BOSS 4 - Flatten Fixer,Write smart_flatten(pools) that keeps flags and double spaces whole but flattens lists,Exercise - Hard
+exercise,BOSS 5 - Full Integrity Module,Combine canonical hash + no .env check + missing file check into one verify() function,Exercise - Hard
+challenge,Why is random.seed(42) dangerous for passwords?,Because anyone who knows seed 42 can predict all your passwords,Challenge - Intermediate
+challenge,Why does hashing in text mode break on Windows?,Because Python converts \n to \r\n in text mode changing bytes and hash,Challenge - Intermediate
+challenge,Why does audit hook not catch all network?,Because some C code can bypass Python audit events. Need OS firewall for 100 percent,Challenge - Hard
+challenge,Why is PBKDF2 with 1000 iterations weak in 2026?,Because GPUs can try billions per second. 1000 iterations is too fast now,Challenge - Hard
+decision,Why prefer secrets over random for crypto?,Because secrets uses OS CSPRNG and is not predictable. random is for simulations,Security Decision - Medium
+decision,Why prefer sha256 over md5 for integrity?,Because md5 collisions are practical. Attacker can make two files with same md5,Security Decision - Medium
+decision,Why prefer binary mode for hashing?,Because binary mode hashes exact bytes. Text mode changes bytes on different OS,Code Decision - Medium
+decision,Why use sys.addaudithook instead of only monkey-patch?,Because monkey-patch can be undone by re-import. Audit hook is harder to bypass,Security Decision - Hard
+
+
+decision,Why fix integrity.py instead of deleting the check?,Because deleting the check would hide tampering. Fixing it keeps the protection,Security Decision - Simple
+decision,Why use canonical hash instead of normal hash?,Because normal hash changes with file order and line endings. Canonical hash is stable everywhere,Security Decision - Medium
+decision,Why exclude the baseline hash from its own hash?,Because a file cannot contain its own hash and still match. It creates an impossible loop,Security Decision - Intermediate
+decision,Why keep MAIN_CLONE as working branch?,Because MAIN_CLONE already had the working code and the backup was old. Working on MAIN_CLONE protects the backup,Git Decision - Simple
+decision,Why not push fix to backup branch?,Because backup must stay old. Its job is to let you go back to before the fix,Git Decision - Simple
+decision,Why use network isolation in a passphrase generator?,Because a generator that goes online can leak secrets. Offline means no leak,Security Decision - Simple
+decision,Why block socket.socket instead of just warning user?,Because a warning can be ignored. Blocking stops the leak even if code is buggy,Security Decision - Intermediate
+decision,Why add audit hook on top of socket blocking?,Because socket blocking can be bypassed. Audit hook is a second layer that catches socket.connect,Security Decision - Hard
+decision,Why keep _REAL_SOCKET saved before blocking?,Because the guard itself needs a real socket to test. Without it you cannot tell if blocking works,Code Decision - Intermediate
+decision,Why not reuse the passphrase you pasted in chat?,Because once pasted it is no longer secret. Test passphrases are for proof not for real use,Security Decision - Simple
+decision,Why keep 7 tests instead of just 1 check?,Because one check only proves one thing. 7 tests prove missing file modified file forbidden patterns and clean pass,Testing Decision - Medium
+decision,Why call it over-engineered for personal use but right for public tool?,Because personal tool needs 99 percent safety. Public tool needs people to trust it so extra layers matter,Project Decision - Medium
+concept,Integrity Self-Check,A program that hashes its own files and compares to a saved baseline to detect tampering,Security - Simple
+concept,Canonical Hash,Hashing files in fixed sorted order with fixed line endings so same files always give same hash,Security - Medium
+concept,Self-Hash Problem,If a file hashes itself its hash changes every time you save the new hash inside it so it can never match,Security - Intermediate
+concept,Git Branch,A separate line of work. MAIN_CLONE was your working branch today,Git - Simple
+concept,Backup Branch,A branch saved before a risky change so you can go back like BACKUP_MAIN_CLONE_2026-11-20_before-selfhash-fix,Git - Simple
+concept,Network Isolation,Forcing a passphrase generator to work offline so it cannot leak secrets,Security - Simple
+concept,Socket Blocking,Replacing socket.socket with a function that raises an error to stop network calls,Security - Intermediate
+concept,Audit Hook,A Python sys.addaudithook that watches for events like socket.connect and blocks them,Security - Hard
+concept,Entropy,How unpredictable a passphrase is. More random choices means higher entropy and harder to guess,Security - Medium
+concept,Passphrase vs Password,A passphrase is longer and made of multiple random chunks. A password is often one short word,Cryptography - Simple
+concept,Env File Risk,A .env file often holds secrets. A generator should never auto-load it,Secrets To Avoid - Medium
+concept,Test Suite,A set of small tests that each check one behavior like your 7/7 integrity tests,Testing - Simple
+concept,Over-Engineering,Adding more layers than your threat model needs like triple network blocking and 5 branches for one person,Design Principle - Medium
+concept,Separation of Concerns,Pools crypto generation and user interface are kept in different files,Design Principle - Simple
+concept,Path Fingerprinting,When a generator always follows the same structural pattern it becomes easier to recognize,Security - Hard
+concept,Non-Deterministic Generation,Every run produces different output so the exact path cannot be predicted in advance,Security - Medium
+question,What does MAIN_CLONE -> MAIN_CLONE mean in git push?,Left side is your local branch right side is GitHub branch. Your commit 740dd34 went to MAIN_CLONE on GitHub,Git - Simple
+question,Why did integrity check fail before today fix?,Because integrity.py was hashing itself including its own stored baseline hash so it always mismatched,Code Understanding - Intermediate
+question,Why does sorted order matter for hashing?,Without sorting files hash in random order on different machines and the hash changes even if files did not,Code Understanding - Medium
+question,What does 7/7 tests passed mean?,All 7 integrity tests passed: self-inclusion no .env collect_hashes forbidden patterns missing file modification clean pass,Testing - Simple
+question,What did network isolation test prove?,socket.socket was blocked _REAL_SOCKET still worked for the guard and audit hook caught socket.connect,Security - Intermediate
+question,Why is a weird passphrase with emoji and foreign letters strong?,It mixes numbers emoji and foreign letters with no dictionary words so guessing is much harder,Security - Simple
+question,What is the danger of working directly on main branch?,You can easily break the stable version of the project,Git - Simple
+question,Why should commit messages be clear?,Because they become part of public history like fix: make integrity self-check stable with canonical hash,Git - Simple
+question,What is the biggest limitation of triple network blocking?,It is extra code to maintain and one solid block would already stop most leaks,Project Evaluation - Hard
+question,How does audit hook know to block network?,It compares the saved next event with socket.connect and raises if it matches,Logic - Hard
+challenge,Main challenge when fixing self-hash,Breaking the loop where the checker changes the file it is checking,Challenge - Intermediate
+challenge,Main challenge when designing custom derivation paths,Balancing strong obfuscation with the risk of creating detectable patterns,Challenge - Hard
+challenge,Main challenge when testing network isolation,Proving blocking works without breaking the guard that needs to test it,Challenge - Intermediate
+challenge,Main challenge when managing 5 branches,Remembering which branch has the fix and which branch is still old,Challenge - Simple
+command,git branch,List all branches and show * on current branch like * MAIN_CLONE,Git Command - Simple
+command,git push origin MAIN_CLONE,Push MAIN_CLONE branch to GitHub,Git Command - Simple
+command,python test_integrity.py,Run integrity tests and show 7/7 passed,Testing Command - Simple
+command,python test_network_isolation.py,Run network isolation tests and show socket blocking works,Testing Command - Simple
+command,git log --oneline -3,Show last 3 commits like 740dd34 fix message,Git Command - Medium
+code,Canonical hash pattern,"sorted(files) + read bytes + normalize line endings + hashlib.sha256()",Code Pattern - Intermediate
+code,Socket blocker pattern,"def blocked_socket(*a **k): raise PermissionError(Network disabled)",Code Pattern - Intermediate
+code,Audit hook pattern,"sys.addaudithook(lambda event args: raise if event == socket.connect)",Code Pattern - Hard
+code,Save real socket before blocking,"_REAL_SOCKET = socket.socket before replacing socket.socket",Code Pattern - Intermediate
+secret,Passphrase you generated today,Any passphrase you paste in chat is no longer secret. Generate fresh one for real use,Secrets To Avoid - Simple
+secret,.env file,File containing all environment secrets should be in .gitignore,Secrets To Avoid - Simple
+secret,Git History,Risk that deleted secret still exists in old commits,Git Risk - Medium
+secret,Screenshots / Logs,console.log that accidentally prints tokens,Code Leak - Simple
+exercise,Explain Self-Hash In Your Words,Explain why a file cannot store its own hash inside itself and still pass a check,Exercise - Simple
+exercise,Count Passphrase Levels,Count how many levels your generated passphrase has by counting / separators + 1,Exercise - Simple
+exercise,Spot The Branch,If git push says MAIN_CLONE -> MAIN_CLONE which branch on GitHub got the commit?,Exercise - Simple
+exercise,Fix The Hash Order,You have files b.py a.py c.py. Write the sorted order they must be hashed in,Exercise - Medium
+exercise,Design A Tamper Test,Change one character in a test file then predict: should integrity pass or fail? Why?,Exercise - Medium
+exercise,Build A Simple Blocker,Write a fake socket.socket function that raises PermissionError with message Network disabled,Exercise - Intermediate
+exercise,Explain Audit Hook,Explain in 2 sentences what sys.addaudithook does and why you used it for socket.connect,Exercise - Intermediate
+exercise,Decide Over-Engineering,List one feature from today that is essential and one that is extra. Justify both,Exercise - Intermediate
+exercise,Restore From Backup,You broke MAIN_CLONE. Write git commands to create a new branch from BACKUP_MAIN_CLONE_2026-11-20_before-selfhash-fix,Exercise - Hard
+exercise,Design Canonical Hash,Design a canonical hash that works on Windows and Linux handles line endings sorting and excludes its own baseline,Exercise - Hard
